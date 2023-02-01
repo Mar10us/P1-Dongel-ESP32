@@ -83,7 +83,7 @@ const jsversie			= 221201;
   LastVersionOTA = "";
   
 // ---- DASH
-var TotalAmps=0.0,minKW = 0.0, maxKW = 0.0,minV = 0.0, maxV = 0.0, Pmax,Gmax, Wmax;
+var TotalAmps=0.0,minKW = 0.0, maxKW = 0.0,minV = 0.0, maxV = 255.0, Pmax,Gmax, Wmax;
 var hist_arrW=[4], hist_arrG=[4], hist_arrPa=[4], hist_arrPi=[4], hist_arrP=[4]; //berekening verbruik
 var day = 0;
 
