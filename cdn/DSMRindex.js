@@ -83,7 +83,7 @@ const jsversie			= 221201;
   LastVersionOTA = "";
   
 // ---- DASH
-var TotalAmps=0.0,minKW = 0.0, maxKW = 0.0,minV = 0.0, maxV = 255.0, Pmax,Gmax, Wmax;
+var TotalAmps=0.0,minKW = 0.0, maxKW = 0.0, minV = 255.0, maxV = 0.0, Pmax,Gmax, Wmax;
 var hist_arrW=[4], hist_arrG=[4], hist_arrPa=[4], hist_arrPi=[4], hist_arrP=[4]; //berekening verbruik
 var day = 0;
 
@@ -604,12 +604,17 @@ function UpdateDash()
 		if (v1 && (!Injection || ShowVoltage) ) {
 			document.getElementById("l2").style.display = "block"
 			document.getElementById("fases").innerHTML = Phases;
-				
-			let Vmin_now = math.min(v1, v2, v3);
-			let Vmax_now= math.max(v1, v2, v3);
+			
+      //default is 1 phase
+      let Vmin_now = v1;
+			let Vmax_now = v1;
+      if( Phases == 3){
+			  let Vmin_now = math.min(v1, v2, v3);
+			  let Vmax_now = math.max(v1, v2, v3);
+      }
 			
 			//min - max waarde
-			if (minV == 0.0 || Vmin_now < minV) { minV = Vmin_now; }
+			if (Vmin_now < minV) { minV = Vmin_now; }
 			if (Vmax_now > maxV) { maxV = Vmax_now; }
 			document.getElementById(`power_delivered_2max`).innerHTML = Number(maxV.toFixed(1)).toLocaleString();
 			document.getElementById(`power_delivered_2min`).innerHTML = Number(minV.toFixed(1)).toLocaleString();   
