@@ -5,13 +5,167 @@
 */
 
 const APIGW = window.location.protocol+'//'+window.location.host+'/api/';
+const URL_HISTORY_HOURS = APIGW + "../RNGhours.json";
 const URL_HISTORY_DAYS = APIGW + "../RNGdays.json";
 const URL_HISTORY_MONTHS = APIGW + "../RNGmonths.json";
 const listValuesCeilingE = [339, 280, 267, 207, 181, 159, 161, 176, 199, 266, 306, 356];
 const listValuesCeilingG = [221, 188, 159,  86,  35,  19,  17,  17,  24,  81, 146, 207];
 
 let timerRefresh = 0;
-let sCurrentChart = "MONTHS";
+let sCurrentChart = "MONTH"; //YEAR
+var objStorage;
+
+var testdata_days = {"actSlot":14,"data":[
+	{"date":"23012323","values":[  8819.390,  7695.284,     0.049,     0.000,  6652.291,     0.000]},
+	{"date":"23012423","values":[  8820.347,  7697.796,     0.049,     0.000,  6660.381,     0.000]},
+	{"date":"23012515","values":[  8821.141,  7699.504,     0.049,     0.000,  6666.551,     0.000]},
+	{"date":"23012623","values":[  8822.313,  7703.584,     0.049,     0.000,  6677.245,     0.000]},
+	{"date":"23012723","values":[  8823.235,  7706.149,     0.049,     0.000,  6683.432,     0.000]},
+	{"date":"23012823","values":[  8827.208,  7706.149,     0.049,     0.000,  6690.690,     0.000]},
+	{"date":"23012923","values":[  8831.034,  7706.149,     0.049,     0.000,  6697.351,     0.000]},
+	{"date":"23013023","values":[  8832.304,  7708.166,     0.049,     0.000,  6698.475,     0.000]},
+	{"date":"23013123","values":[  8833.276,  7709.986,     0.049,     0.000,  6700.638,     0.000]},
+	{"date":"23020123","values":[  8834.253,  7712.194,     0.049,     0.000,  6708.270,     0.000]},
+	{"date":"23020223","values":[  8835.141,  7714.685,     0.049,     0.000,  6713.317,     0.000]},
+	{"date":"23020323","values":[  8836.044,  7717.141,     0.049,     0.000,  6718.636,     0.000]},
+	{"date":"23020423","values":[  8840.016,  7717.141,     0.049,     0.000,  6724.678,     0.000]},
+	{"date":"23020523","values":[  8846.244,  7717.141,     0.049,     0.000,  6729.662,     0.000]},
+	{"date":"23020616","values":[  8847.025,  7719.304,     0.049,     0.000,  6733.392,     0.000]}
+	]};
+var testdata_months= {"actSlot":16,"data":[
+	{"date":"21100101","values":[  5987.000,  6198.000,     0.000,     0.000,  5170.000,     0.000]},
+	{"date":"21110101","values":[  6074.000,  6418.000,     0.000,     0.000,  5234.000,     0.000]},
+	{"date":"21120101","values":[  6163.000,  6712.000,     0.000,     0.000,  5343.000,     0.000]},
+	{"date":"22010101","values":[  6535.000,  7059.000,     0.000,     0.000,  5496.000,     0.000]},
+	{"date":"22020101","values":[  6887.000,  7093.000,     0.000,     0.000,  5683.000,     0.000]},
+	{"date":"22030101","values":[  7186.000,  7131.000,     0.000,     0.000,  5837.000,     0.000]},
+	{"date":"22040101","values":[  7409.000,  7176.000,     0.000,     0.000,  5982.000,     0.000]},
+	{"date":"22050101","values":[  7559.000,  7230.000,     0.000,     0.000,  6104.004,     0.000]},
+	{"date":"22060101","values":[  7653.000,  7295.000,     0.000,     0.000,  6191.000,     0.000]},
+	{"date":"22070101","values":[  7728.000,  7368.000,     0.000,     0.000,  6245.000,     0.000]},
+	{"date":"22080101","values":[  7823.000,  7443.000,     0.000,     0.000,  6274.000,     0.000]},
+	{"date":"22090101","values":[  7972.000,  7516.000,     0.000,     0.000,  6294.000,     0.000]},
+	{"date":"22100101","values":[  8196.000,  7581.000,     0.000,     0.000,  6324.000,     0.000]},
+	{"date":"22110101","values":[  8494.000,  7635.000,     0.000,     0.000,  6377.000,     0.000]},
+	{"date":"22120101","values":[  8650.000,  7680.000,     0.000,     0.000,  6479.000,     0.000]},
+	{"date":"23013123","values":[  8833.276,  7709.986,     0.049,     0.000,  6700.638,     0.000]},
+	{"date":"23020616","values":[  8847.025,  7719.304,     0.049,     0.000,  6733.392,     0.000]},
+	{"date":"21020101","values":[  5352.000,  5124.000,     0.000,     0.000,  4373.000,     0.000]},
+	{"date":"21030101","values":[  5438.000,  5417.000,     0.000,     0.000,  4573.000,     0.000]},
+	{"date":"21040101","values":[  5521.000,  5417.000,     0.000,     0.000,  4759.000,     0.000]},
+	{"date":"21050101","values":[  5599.000,  5638.000,     0.000,     0.000,  4913.000,     0.000]},
+	{"date":"21060101","values":[  5675.000,  5785.000,     0.000,     0.000,  5022.000,     0.000]},
+	{"date":"21070101","values":[  5751.000,  5880.000,     0.000,     0.000,  5087.000,     0.000]},
+	{"date":"21080101","values":[  5826.000,  5956.000,     0.000,     0.000,  5118.000,     0.000]},
+	{"date":"21090101","values":[  5905.000,  6050.000,     0.000,     0.000,  5138.000,     0.000]}
+	]};
+
+class localstorage{
+	constructor() {
+        this.months=testdata_months;
+        this.days=testdata_days;
+        this.hours=[];
+        this.minutes=[];
+		this.timerREFRESH = 0;
+		this.init();
+    }
+	
+	fetchDataJSON(url, fnHandleData)
+	{
+		console.log("fetchDataJSON()");		
+		fetch(url)
+		.then(response => response.json())
+		.then(json => { fnHandleData(json); })
+		.catch(function (error) {
+			var p = document.createElement('p');
+			p.appendChild( document.createTextNode('Error: ' + error.message) );
+		});
+	}
+
+	init()
+	{
+		this.refresh();
+	}
+
+    //store json data 
+    refresh()
+	{
+		console.log("refresh");
+		clearInterval(this.timerREFRESH);
+		this.fetchDataJSON( URL_HISTORY_MONTHS, this.parseMonths.bind(this));
+		this.fetchDataJSON( URL_HISTORY_DAYS, this.parseDays.bind(this));
+		this.fetchDataJSON( URL_HISTORY_HOURS, this.parseHours.bind(this));
+    	this.timerREFRESH = setInterval(this.refresh.bind(this), 60 * 1000);
+	}	
+
+	parseMonths(json)
+	{
+		console.log("parseMonths");
+		console.log(json);
+		//TODO: filter out the corrupt row
+		this.months = json;
+	}
+	parseDays(json)
+	{
+		console.log("parseDays");
+		console.log(json);
+		//TODO: filter out the corrupt row
+		this.days = json;
+	}
+	parseHours(json)
+	{
+		console.log("parseHours");
+		console.log(json);
+		//TODO: filter out the corrupt row
+		this.hours = json;
+	}
+
+	getMonths()
+	{
+		return this.months;
+	}
+	getDays()
+	{
+		return this.days;
+	}
+
+	//get a specific YYMM row
+	getMonth(nYY, nMM)
+	{
+		var ret = [];
+		var sYYMM = (""+nYY)+((nMM<=9)?"0"+nMM:nMM);
+		for(var i=0;i<this.months.data.length; i++)
+		{
+			var item = this.months.data[i];
+			var date = item.date;
+			if( sYYMM == date.substring(0,4))
+			{
+				ret.push( item )
+			}
+		}		
+		return ret;
+	}
+
+	//get every row from a specific year
+	getYear(nYY)
+	{
+		var ret = [];
+		var sYY = ""+nYY;
+		for(var i=0;i<this.months.data.length; i++)
+		{
+			var item = this.months.data[i];
+			var date = item.date;
+			if( sYY == date.substring(0,2))
+			{
+				ret.push( item )
+			}
+		}
+		ret.sort((a, b) => {
+			return a.date.localeCompare(b.date);
+		});
+		return ret;
+	}
+}
 
 var objChart1;
 var objChart2;
@@ -108,11 +262,70 @@ function createDatasetLINE(fill, color, label) {
 	return ds;
 }
 
+//accumulate list with values
+//convert from relative to absolute values
+// before [3,3,5]
+// after [0,3,6,11]
+function accumulateArray(listValues)
+{
+	var listACCU=[];
+	var nTotal=0;	
+	for (var i=0; i < listValues.length; i++) 
+	{		
+		listACCU.push(nTotal);
+		//fix a gap in the data
+		if(isNaN(nTotal)) nTotal = 0;
+		nTotal += listValues[i];
+	}
+	//add remaining total
+	listACCU.push(nTotal);
+	return listACCU;
+}
+
+//convert from absolute to relative values since start
+//by using a prev value, add a new cell0, calc diff with this prev
+// before [10,15,25],[9]
+// after [0,1,6,16]
+function normalizeArray(a, prev)
+{
+	b = new Array( a.length + 1);
+	b[0] = 0;
+	for(var i=0; i<a.length; i++)
+	{
+		b[i+1] = a[i] - prev;
+	}
+	return b;
+}
+
+//create a history container with depth = 3
+function createHistoryContainer()
+{
+	let dc = {};
+	dc.current 	  ={name:"", valid:false, data: []};
+	dc.previous	  ={name:"", valid:false, data: []};
+	dc.preprevious={name:"", valid:false, data: []};
+	return dc;
+}
+
+//helper function to set all values to a value in an array
+function fillArray(array, value) {
+	for (var idx = 0; idx < array.length; idx++) {
+		array[idx] = value;
+	}
+}
+
+function fillArrayNULL(array) {
+	fillArray(array, null);
+}
+
 window.onload = fnBootstrap;
 
 function fnBootstrap() 
 {
 	createCharts();
+
+	//create storage
+	objStorage = new localstorage();
 
 	//handle #
 	if (location.hash)
@@ -120,52 +333,58 @@ function fnBootstrap()
 		console.log(location.hash);
 		subpage = location.hash.slice(1);
 		switch(subpage){
-			case "months": sCurrentChart = "MONTHS"; break;
-			case "days": sCurrentChart = "DAYS"; break;
+			case "year": sCurrentChart = "YEAR"; break;
+			case "month": sCurrentChart = "MONTH"; break;
 		}
 	}
 
 	//refresh and schedule every 60sec
 	refreshData();
 	clearInterval(timerRefresh);
-    timerRefresh = setInterval(refreshData, 60 * 1000); // repeat every 60s
+    timerRefresh = setInterval(refreshData, 30 * 1000); // repeat every 20s
+
+	//add handlers for the buttons
+	document.getElementById("btnYear").onclick = setViewYEAR;
+	document.getElementById("btnMonth").onclick = setViewMONTH;
+}
+
+function setViewMONTH()
+{
+	sCurrentChart = "MONTH";
+	document.getElementById("btnYear").classList.remove("active");
+	document.getElementById("btnMonth").classList.add("active");
+	getDays();
+	clearInterval(timerRefresh);
+    timerRefresh = setInterval(refreshData, 30 * 1000); // repeat every 20s
+}
+
+function setViewYEAR()
+{
+	sCurrentChart = "YEAR";
+	document.getElementById("btnMonth").classList.remove("active");
+	document.getElementById("btnYear").classList.add("active");
+	getMonths();
+	clearInterval(timerRefresh);
+    timerRefresh = setInterval(refreshData, 30 * 1000); // repeat every 20s
 }
 
 function refreshData()
 {
 	switch(sCurrentChart){
-		case "MONTHS": getMonths(); break;
-		//case "DAYS": getDays(); break;
+		case "YEAR" : setViewYEAR(); break;
+		case "MONTH": setViewMONTH(); break;
 	}
 }
 
 function getMonths()
 {
-	console.log("fetch(" + URL_HISTORY_MONTHS + ")");
-	fetch(URL_HISTORY_MONTHS, {"setTimeout": 5000})
-		.then(function (response) {
-			if (response.status !== 200) {
-				throw new Error(response.status);
-			} else {
-				return response.json();
-			}
-		})
-		.then(function (json) {
-			parseMonths(json);
-		})
-		.catch(function (error) {
-			var p = document.createElement('p');
-			p.appendChild(
-				document.createTextNode('Error: ' + error.message)
-			);
-			console.log(error);
-			//alert_message("Fout bij ophalen van de historische daggegevens");
-		});
+	var json = objStorage.getMonths();
+	parseMonths(json);
 }
 
 function parseMonths(json)
 {
-	console.log("parseMonth");
+	//console.log("parseMonth");
 
 	data = expandData_v2(json);
 	
@@ -173,6 +392,7 @@ function parseMonths(json)
 	showMonths(data);
 }
 
+//copy of the DMSRindex.js but without the costs
 function expandData_v2(dataIN) {
 	console.log("expandData_v2()");
 	console.log(dataIN);
@@ -217,289 +437,174 @@ function expandData_v2(dataIN) {
 
 function showMonths(histdata)
 {
-	const [dcE1, dcG1] = createChartDataContainerBURNUP(histdata);
+	const [dcE1, dcG1] = prepareDataBURNUP_MONTHSINYEAR(histdata);
 	
+	objChart1.options.scales.x.title.text = "Maanden";
 	objChart1.data = dcE1;
 	objChart1.update();
 	
+	objChart2.options.scales.x.title.text = "Maanden";
 	objChart2.data = dcG1;
 	objChart2.update();
 }
 
 //=============================TODO: REFACTOR=============================================================
 
-function createDataset() {
-	let ds = {};
-	ds.labels = [];
-	ds.datasets = [];
-	return ds;
-}
-
 function getDays() {
-	console.log("fetch(" + URL_HISTORY_DAYS + ")");
-	const other_params = {
-		setTimeout: 5000
-	};
-	fetch(URL_HISTORY_DAYS, other_params)
-		.then(function (response) {
-			if (response.status !== 200) {
-				throw new Error(response.status);
-			} else {
-				return response.json();
-			}
-		})
-		.then(function (json) {
-			updateDays(testdata);
-		})
-		.catch(function (error) {
-			var p = document.createElement('p');
-			p.appendChild(
-				document.createTextNode('Error: ' + error.message)
-			);
-			console.log(error);
-			//alert_message("Fout bij ophalen van de historische daggegevens");
-		});
+	json = objStorage.getDays();
+	parseDays(json);
 }
 
-function updateDays(json) {
-	console.log(json);
+function parseDays(json) {
 
-	nStart = 6440;
-	ds1 = createBreakdown1(nStart, json);
-	ds2 = createBreakdown2(nStart, json);
+	//expand data
+	data = expandData_v2(json);
 
-	myChart1.data = ds1;
-	myChart1.update();
-
-	myChart2.data = ds2;
-	myChart2.update();
+	//show days
+	showDays( data );
 }
 
-function createBreakdown1(nStart, json) {
-	//get date and hour from json
-	var current = json.data[json.actSlot];
-	var timestamp = current.date;
-	var date = timestamp.substring(0, 6);
-	var hour = timestamp.substring(6, 8);
+function showDays(histdata)
+{
+	//console.log(histdata);
 
-	//get daycount for month
-	var nDaycount = 31;
+	const [dcE1,dcG1] = prepareDataBURNUP_DAYSINMONTH(histdata);
+	
+	objChart1.options.scales.x.title.text = "Dagen";
+	objChart1.data = dcE1;
+	objChart1.update();
 
-	//get prijsplafond for month
-	var nCeilingMonth = 288;
+	objChart2.options.scales.x.title.text = "Dagen";
+	objChart2.data = dcG1;
+	objChart2.update();
+}
 
-	//prepare arrays and labels
-	var ceiling = [nDaycount + 1];
-	var labelsx = [nDaycount + 1];
-	var values = [nDaycount + 1];
-	var valuesPREV = [nDaycount + 1];
-	for (i = 0; i < nDaycount + 1; i++) {
-		ceiling[i] = null;
-		values[i] = null;
-		valuesPREV[i] = null;
-		labelsx[i] = i.toString();
+function prepareDataBURNUP_DAYSINMONTH(histdata)
+{
+	//only this month
+	const [hcED, hcGD, hcWD] = convertRingBufferToStaticHistoryContainerDIM( histdata);
+	//console.log(hcED);
+	//console.log(hcGD);
+	//console.log(hcWD);
+
+	//get day 0 values
+	objToday = new Date();
+	nYY = objToday.getFullYear() - 2000;
+	nMM = objToday.getMonth()+1;
+	//current month start is previous month end
+	var itemCM = objStorage.getMonth(nYY,nMM-1)[0];
+	var nCED0 = itemCM.values[0] + itemCM.values[1];
+	var nCGD0 = itemCM.values[4];
+	var nCWD0 = itemCM.values[5];
+
+	//get meterreadiung previous month
+	if( nMM-2 <= 0)
+	{
+		nYY -= 1;
+		nMM = 12;
 	}
-	ceiling[0] = 0;
-	ceiling[nDaycount] = nCeilingMonth;
+	else
+		nMM -= 2;
+	var itemPM = objStorage.getMonth(nYY,nMM)[0];
+	var nPED0 = itemPM.values[0] + itemPM.values[1];
+	var nPGD0 = itemPM.values[4];
+	var nPWD0 = itemPM.values[5];
 
-	var offset = json.actSlot;
-	//values[0]=0;
-	//fill array with daily values
-	for (var i = 0; i < 14; i++) {
-		//calc offset for start ringbuffer
-		var idx = (i + offset + 1 - 14 + json.data.length) % json.data.length;
+	//add absolute reading for day0 and calc relative values
+	hcED.current.data = normalizeArray(hcED.current.data, nCED0);
+	hcED.previous.data = normalizeArray(hcED.previous.data, nPED0);
+	hcGD.current.data = normalizeArray(hcGD.current.data, nCGD0);
+	hcGD.previous.data = normalizeArray(hcGD.previous.data, nPGD0);
 
-		//get timestamp and skip if invalid
-		var timestamp = json.data[idx].date;
-		if (timestamp == "20000000") continue;
+	//create chartdata for each
+	cdED = createChartDataContainerBURNUP_DAYS( hcED, listValuesCeilingE );
+	cdGD = createChartDataContainerBURNUP_DAYS( hcGD, listValuesCeilingG );
 
-		//split timestamp
-		var date = "20" + timestamp.substring(0, 6);
-		var hour = timestamp.substring(6, 8);
+	return [cdED, cdGD];
+}
 
-		//get values
-		var vals = json.data[idx].values;
+function createChartDataContainerBURNUP_DAYS(hcDELIVERED, ceiling)
+{
+	var nCurrentMM = new Date().getMonth();
+	var nCurrentYYYY = new Date().getFullYear();
+	var nCeilingMonth = ceiling[nCurrentMM];
 
-		//values for gas / elektra
-		var nGAS = vals[4];
-		var nELEKTRA = vals[0] + vals[1];
+	//get day 0 will return the number of days of the prev month
+	var nDaycount = new Date(nCurrentYYYY, nCurrentMM+1, 0).getDate();
 
-		//get month
-		var nMM = parseInt(date.substring(4, 6));
-		//TODO: place in thismonth or previous month dataset
-		//if nMM == nThisMM
-		//values[j] = nGAS - nStart
-		//else
-		//valuesPREV = nGas - nStart;
+	//create ceiling array
+	var listCeiling = new Array(32);
+	fillArrayNULL(listCeiling);
+	listCeiling[0] = 0;
+	listCeiling[nDaycount] = nCeilingMonth;
 
-		//get day of the month
-		var j = parseInt(date.substring(6, 8)) + 1;
-		//write value to correct index
-		values[j] = nGAS - nStart;
+	//create label array
+	var listLABELS =[];
+	for(i=0; i<32; i++)
+	{
+		sNumber = i.toString();
+		listLABELS[i] = sNumber;
 	}
-
-	console.log(labelsx);
-	console.log(ceiling);
-	console.log(values);
-
-	//create a datacontainer
-	var ds = createDataset();
-	ds.labels = labelsx;
 
 	//create datasets
-	var ds1 = createDatasetLINE(false, 'blue', "verbruik");
-	var ds2 = createDatasetLINE(false, 'red', "plafond");
+	var dcBX = createDatasetsForBURNUP_DAYS(listLABELS, hcDELIVERED, listCeiling);
 
-	//some extra settings
-	ds1.data = values;
-	ds1.spanGaps = true;
-	ds2.data = ceiling;
-	ds2.spanGaps = true;
-	ds2.fill = "end";
-	ds2.backgroundColor = 'LightPink';
-
-	//add to datacontainer
-	ds.datasets.push(ds1);
-	ds.datasets.push(ds2);
-
-	//return
-	return ds;
+	return dcBX
 }
 
-function createBreakdown2(nStart, json) {
-	//get date and hour from json
-	current = json.data[json.actSlot];
-	timestamp = current.date;
-	date = timestamp.substring(0, 6);
-	hour = timestamp.substring(6, 8);
-
-	//get daycount for month
-	var nDaycount = 31;
-
-	//get prijsplafond for month
-	var nCeilingMonth = 288;
-
-	//prepare arrays and labels
-	nEntries = nDaycount + 1;
-	var ceiling = [nEntries];
-	var labelsx = [nEntries];
-	var values = [nEntries];
-	for (i = 0; i < nEntries; i++) {
-		ceiling[i] = null;
-		values[i] = null;
-		labelsx[i] = i.toString();
-	}
-	ceiling[0] = nCeilingMonth;
-	ceiling[nDaycount] = 0;
-
-	var offset = json.actSlot;
-	nBreakDown = nCeilingMonth;
-	//fill array with daily values
-	for (var i = 0; i < 14; i++) {
-		//calc offset for start ringbuffer
-		var idx = (i + offset + 1 - 14 + json.data.length) % json.data.length;
-
-		//get timestamp and skip if invalid
-		var timestamp = json.data[idx].date;
-		if (timestamp == "20000000") continue;
-
-		//split timestamp
-		var date = "20" + timestamp.substring(0, 6);
-		var hour = timestamp.substring(6, 8);
-
-		//get values
-		var vals = json.data[idx].values;
-
-		//values for gas / elektra
-		var nGAS = vals[4];
-		var nELEKTRA = vals[0] + vals[1];
-
-		//get day of the month
-		var j = parseInt(date.substring(6, 8)) + 1;
-		//write value to correct index
-		var nDayValue = nGAS - nStart;
-		nBreakDown = nCeilingMonth - nDayValue;
-		values[j] = nBreakDown;
-	}
-
+function createDatasetsForBURNUP_DAYS(listLABELS, hcBURNUP, listCeiling) {
 	//create a datacontainer
-	var ds = createDataset();
-	ds.labels = labelsx;
+	var cdcBurnup = createChartDataContainer();
+	cdcBurnup.labels = listLABELS;
 
 	//create datasets
-	var ds1 = createDatasetLINE(false, 'blue', "verbruik");
-	var ds2 = createDatasetLINE(false, 'red', "plafond");
+	var dsE1 = createDatasetLINE(false, 'rgba(0, 0, 139, 1)', hcBURNUP.current.name);
+	var dsE2 = createDatasetLINE(false, 'rgba(0, 0, 139, .25)', hcBURNUP.previous.name);
+	var dsE4 = createDatasetLINE(false, 'red', "plafond");
 
-	//some extra settings
-	ds1.data = values;
-	ds1.spanGaps = true;
-	ds2.data = ceiling;
-	ds2.spanGaps = true;
-	ds2.fill = 'start';
-	ds2.backgroundColor = 'LightPink';
+	//attach data
+	dsE1.data = hcBURNUP.current.data;
+	dsE2.data = hcBURNUP.previous.data;
 
-	//add to datacontainer
-	ds.datasets.push(ds1);
-	ds.datasets.push(ds2);
+	//set additional config
+	dsE2.spanGaps = true;		//this dataset is not complete, so straighten line from 0 to first datapoint
+	dsE4.spanGaps = true;		//for DAYS_IN_MONTH we only provide start and end
 
-	//return
-	return ds;
+	//hide previous years by default	
+	dsE2.hidden = true;
+
+	//config for ceiling
+	dsE4.data = listCeiling;
+	dsE4.fill = "end";
+	dsE4.backgroundColor = 'rgba(255, 0, 0, .125)';
+
+	//add datasets to chartdata
+	cdcBurnup.datasets.push(dsE1);
+	cdcBurnup.datasets.push(dsE2);
+	cdcBurnup.datasets.push(dsE4);
+
+	//return chartdata
+	return cdcBurnup;
 }
-
 
 //
 //============================================ CHECKED ====================================================
 //
-function fillArray(array, value) {
-	for (var idx = 0; idx < array.length; idx++) {
-		array[idx] = value;
-	}
-}
-function fillArrayNULL(array) {
-	fillArray(array, null);
-}
 
 //create chartdata for the history ringbuffer MONTHS
-function createChartDataContainerBURNUP(data) 
+function prepareDataBURNUP_MONTHSINYEAR(data) 
 {
 	//labels for a year
 	var listLABELS = ["0", "JAN", "FEB", "MRT", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 	//calculate chart data
 	const [hcED, hcGD, hcWD] = convertRingBufferToStaticHistoryContainerMIY(data);
 	//create datasets for ELEKTRA
-	var dcE1 = createDataContainerBURNUP(listLABELS, listValuesCeilingE, hcED);
+	var dcE1 = createChartDataContainerBURNUP_MONTHS(listLABELS, listValuesCeilingE, hcED);
 	//create datasets for GAS
-	var dcG1 = createDataContainerBURNUP(listLABELS, listValuesCeilingG, hcGD);
+	var dcG1 = createChartDataContainerBURNUP_MONTHS(listLABELS, listValuesCeilingG, hcGD);
 	//create datasets for WATER
-	//var dcW1 = createDataContainerBURNUP(listLABELS, listValuesCeilingW, hcWD);
+	//var dcW1 = createChartDataContainerBURNUP_MONTHS(listLABELS, listValuesCeilingW, hcWD);
 	return [dcE1,dcG1];
-}
-
-//accumelate list with values
-function accumulateArray(listValues)
-{
-	var listACCU=[];
-	var nTotal=0;	
-	for (var i=0; i < listValues.length; i++) 
-	{		
-		listACCU.push(nTotal);
-		//fix a gap in the data
-		if(isNaN(nTotal)) nTotal = 0;
-		nTotal += listValues[i];
-	}
-	//add remaining total
-	listACCU.push(nTotal);
-	return listACCU;
-}
-
-//create a history container with depth = 3
-function createHistoryContainer()
-{
-	let dc = {};
-	dc.current 	  ={name:"", valid:false, data: []};
-	dc.previous	  ={name:"", valid:false, data: []};
-	dc.preprevious={name:"", valid:false, data: []};
-	return dc;
 }
 
 //create a 3 year datacontainer with months in year
@@ -512,6 +617,19 @@ function createHistoryContainerMIY(listLEGEND)
 	hcED.previous.data = new Array(12);
 	hcED.preprevious.name = listLEGEND[2];
 	hcED.preprevious.data = new Array(12);
+	return hcED;
+}
+
+//create a 2 month datacontainer with 31 days in a month
+function createHistoryContainerDIM(listLEGEND)
+{
+	var hcED = createHistoryContainer();
+	hcED.current.name = listLEGEND[0];
+	hcED.current.data = new Array(31);
+	hcED.previous.name = listLEGEND[1];
+	hcED.previous.data = new Array(31);
+	//hcED.preprevious.name = listLEGEND[2];
+	//hcED.preprevious.data = new Array(12);
 	return hcED;
 }
 
@@ -574,10 +692,81 @@ function convertRingBufferToStaticHistoryContainerMIY(data)
 	return [hcED, hcGD, hcWD];
 }
 
+// convert from a 14 days ringbuffer to a 2 static, 31 days buffers.
+function convertRingBufferToStaticHistoryContainerDIM(data)
+{
+	//calculate current & prev month
+	var nCurrentMM = new Date().getMonth();
+	var nPreviousMM = nCurrentMM-1;
+	//TODO: fix for month JAN
+
+	//list with months
+	var listLABELS = ["JAN", "FEB", "MRT", "APR", "MEI", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+
+	var listLEGEND = [];
+	listLEGEND.push( listLABELS[nCurrentMM] );
+	listLEGEND.push( listLABELS[nPreviousMM] );
+
+	var hcED = createHistoryContainerDIM(listLEGEND);
+	var hcGD = createHistoryContainerDIM(listLEGEND);
+	var hcWD = createHistoryContainerDIM(listLEGEND);
+
+	//filter values ELEKTRA and store in correct month	
+	for (var idx = 0; idx < data.data.length; idx++) 
+	{
+		var item = data.data[idx];
+		var timestamp = item.date;
+		var date = timestamp.substring(0, 6);
+		var nYY = parseInt(date.substring(0, 2));
+		var nMM = parseInt(date.substring(2, 4)) - 1;
+		var nDD = parseInt(date.substring(4, 6)) - 1;
+		//var nHH = parseInt(timestamp.substring(6, 8));
+
+		//this is the corrupt dataslot, so skip
+		if( idx == (data.actSlot+1) % data.data.length) continue;
+
+		//select correct array based on the year
+		if(nMM == nCurrentMM)
+		{
+			hcED.current.valid = true;			
+			//hcED.current.data[nDD] = item.p_ed * 1.0;
+			//hcGD.current.data[nDD] = item.p_gd * 1.0;
+			//hcWD.current.data[nDD] = item.p_wd * 1.0;
+
+			var nED = item.values[0] + item.values[1];
+			var nGD = item.values[4];
+			var nWD = item.values[5];
+			
+			//console.log("CCC", nGD, nCGD0, nGD-nCGD0, item.p_gd);
+			hcED.current.data[nDD] = nED;
+			hcGD.current.data[nDD] = nGD;
+			hcWD.current.data[nDD] = nWD;
+		}
+		if(nMM == nPreviousMM)
+		{
+			hcED.previous.valid = true;
+			//hcED.previous.data[nDD] = item.p_ed * 1.0;
+			//hcGD.previous.data[nDD] = item.p_gd * 1.0;
+			//hcWD.previous.data[nDD] = item.p_wd * 1.0;
+
+			var nED = item.values[0] + item.values[1];
+			var nGD = item.values[4];
+			var nWD = item.values[5];			
+
+			//console.log("PPP", nGD, nPGD0, nGD-nPGD0, item.p_gd);
+			hcED.previous.data[nDD] = nED;
+			hcGD.previous.data[nDD] = nGD;
+			hcWD.previous.data[nDD] = nWD;
+		}
+	} //end for
+
+	return [hcED, hcGD, hcWD];
+}
+
 //accumelate the historycontainer and create a dataset
-function createDataContainerBURNUP(listLABELS, listValuesCeiling, hcDELIVERED)
+function createChartDataContainerBURNUP_MONTHS(listLABELS, listValuesCeiling, hcDELIVERED)
 {	
-	console.log("createDataContainerBURNUP()");
+	console.log("createChartDataContainerBURNUP_MONTHS()");
 
 	//fill ceiling
 	var listCeiling = accumulateArray(listValuesCeiling);
@@ -588,16 +777,16 @@ function createDataContainerBURNUP(listLABELS, listValuesCeiling, hcDELIVERED)
 	hcBURNUP.previous.data = accumulateArray(hcDELIVERED.previous.data);
 	hcBURNUP.preprevious.data = accumulateArray(hcDELIVERED.preprevious.data);
 
-	var dcBX = createDatasetsForBURNUP(listLABELS, hcBURNUP, listCeiling);
+	var dcBX = createDatasetsForBURNUP_MONTHS(listLABELS, hcBURNUP, listCeiling);
 	return dcBX;
 }
 
 //create a dataset for the historycontainer, with labels and ceiling
-function createDatasetsForBURNUP(listLABELS, hcBURNUP, listCeiling)
+function createDatasetsForBURNUP_MONTHS(listLABELS, hcBURNUP, listCeiling)
 {
-	//create a datacontainer
-	var dsBreakdown = createChartDataContainer();
-	dsBreakdown.labels = listLABELS;
+	//create a chartdatacontainer
+	var cdcBurnup = createChartDataContainer();
+	cdcBurnup.labels = listLABELS;
 
 	//create datasets
 	var dsE1 = createDatasetLINE(false, 'rgba(0, 0, 139, 1)', hcBURNUP.current.name);
@@ -623,11 +812,11 @@ function createDatasetsForBURNUP(listLABELS, hcBURNUP, listCeiling)
 	dsE4.backgroundColor = 'rgba(255, 0, 0, .125)';
 	
 	//add datasets to chartdata
-	dsBreakdown.datasets.push(dsE1);
-	dsBreakdown.datasets.push(dsE2);
-	dsBreakdown.datasets.push(dsE3);
-	dsBreakdown.datasets.push(dsE4);
+	cdcBurnup.datasets.push(dsE1);
+	cdcBurnup.datasets.push(dsE2);
+	cdcBurnup.datasets.push(dsE3);
+	cdcBurnup.datasets.push(dsE4);
 
 	//return chartdata
-	return dsBreakdown;
+	return cdcBurnup;
 }
