@@ -128,6 +128,10 @@ class localstorage{
 	{
 		return this.days;
 	}
+	getHours()
+	{
+		return this.hours;
+	}
 
 	//get a specific YYMM row
 	getMonth(nYY, nMM)
