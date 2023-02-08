@@ -326,6 +326,11 @@ if (WtrMtr) {
   doc["b_auth_pw"]["type"] = "s";
   doc["b_auth_pw"]["maxlen"] = sizeof(bAuthPW) -1;
 
+  //by: vdwel
+  doc["enevertoken"]["value"] = eneverToken;
+  doc["enevertoken"]["type"] = "s";
+  doc["enevertoken"]["maxlen"] = sizeof(eneverToken) -1;
+  
   //booleans
   doc["hist"] = EnableHistory;
   doc["water_enabl"] = WtrMtr;

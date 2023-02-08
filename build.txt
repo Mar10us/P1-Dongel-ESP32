@@ -1,0 +1,15 @@
+
+//steps for building P1-Dongle-Pro
+
+1) install Arduino IDE	(v2.0.3)
+2) set additional board managers:
+	https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json
+3) install libs via Library Manager
+	"Time by Michael Margolis"			[1.6.1]
+	"TelnetStream by Juraj"				[1.2.4]
+	"ArduinoJson by Benoit Blanchon"	[6.20.0]
+	"PubSubClient by Nick O'leary"		[2.8]
+	"WifiManager by tzapu"				[2.0.15-rc.1]
+	
+4) install library manual
+	https://github.com/mhendriks/dsmr2Lib.git

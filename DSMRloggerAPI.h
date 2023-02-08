@@ -67,6 +67,7 @@
 #endif  
 
 
+
 // Device Types
 #define PRO         0
 #define PRO_BRIDGE  1
@@ -81,6 +82,7 @@
   #define RED   1
   #define GREEN 2
   byte R_value = 0, B_value = 0, G_value = 0;
+
 
 #define _DEFAULT_HOMEPAGE  "/DSMRindexEDGE.html"
 #define SETTINGS_FILE      "/DSMRsettings.json"
@@ -296,6 +298,9 @@ float     settingENBK = 15.15, settingGNBK = 11.11;
 uint8_t   settingSmHasFaseInfo = 1;
 char      settingHostname[30] = _DEFAULT_HOSTNAME;
 char      settingIndexPage[50] = _DEFAULT_HOMEPAGE;
+
+//by: vdwel
+char      eneverToken[20] = _DEFAULT_ENEVER_TOKEN;
 
 //update
 char      BaseOTAurl[35] = OTAURL;

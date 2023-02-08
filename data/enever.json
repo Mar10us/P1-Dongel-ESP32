@@ -1,0 +1,16 @@
+{
+    "providers":[
+         {"name": "ANWB Energie", "code":"ANWB"}
+        ,{"name": "Zonneplan", "code":"ZP"}
+        ,{"name": "All in power", "code":"AIP"}        
+        ,{"name": "EasyEnergy", "code":"EE"}
+        ,{"name": "Energy Zero", "code":"EZ"}
+        ,{"name": "Frank Energie", "code":"FR"}
+        ,{"name": "Groenestroom Lokaal", "code":"GSL"}
+        ,{"name": "Mijndomein Energie", "code":"MDE"}
+        ,{"name": "NextEnergy", "code":"NE"}
+        ,{"name": "Tibber", "code":"TI"}
+        ,{"name": "Vrij op naam", "code":"VON"}
+        ,{"name": "ZonderGas", "code":"ZG"}
+    ]
+}

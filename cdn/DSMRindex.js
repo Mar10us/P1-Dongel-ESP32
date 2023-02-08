@@ -9,7 +9,15 @@
 ***************************************************************************      
 */
 const APIGW=window.location.protocol+'//'+window.location.host+'/api/';
-const jsversie			= 221201
+const jsversie			= 221201;
+
+  //by mar10us
+  //enever urls
+  const URL_LOCAL_PROVIDERS = APIGW + "../enever.json";
+  const URL_LOCAL_DAYTARIFF_ELEKTRA = APIGW + "../pVandaag.json";
+  const URL_LOCAL_DAYTARIFF_ELEKTRA_YESTERDAY = APIGW + "../pGisteren.json";
+  const URL_LOCAL_DAYTARIFF_GAS = APIGW + "../gVandaag.json";
+  const URL_LOCAL_DAYTARIFF_GAS_YESTERDAY = APIGW + "../gGisteren.json";
   
   "use strict";
 
@@ -59,6 +67,13 @@ const jsversie			= 221201
   var IgnoreGas				= false 
   var Dongle_Config			= ""
   
+  //by mar10us
+  var TariefMode = "";
+  var CurrentProvider="";
+  var listProviders = [];
+  var nCurrentEnergyPriceGAS = 0.0;
+  var nCurrentEnergyPriceELEKTRA = 0.0;
+  
 //---- Version globals
   var LastVersion = "", 
   LastVersionMajor = 0, 
@@ -69,7 +84,7 @@ const jsversie			= 221201
   LastVersionOTA = "";
   
 // ---- DASH
-var TotalAmps=0.0,minKW = 0.0, maxKW = 0.0,minV = 0.0, maxV = 0.0, Pmax,Gmax, Wmax;
+var TotalAmps=0.0,minKW = 0.0, maxKW = 0.0, minV = 255.0, maxV = 0.0, Pmax,Gmax, Wmax;
 var hist_arrW=[4], hist_arrG=[4], hist_arrPa=[4], hist_arrPi=[4], hist_arrP=[4]; //berekening verbruik
 var day = 0;
 
@@ -481,6 +496,8 @@ function SetOnSettings(json){
 		mbusu.forEach(tmp => { tmp.innerHTML = "(GJ)"});
 // 		document.getElementById("gasChart").style.height = "250px";
 	}
+
+  readEnergyTariffs();
 }
   
 //============================================================================  
@@ -588,12 +605,17 @@ function UpdateDash()
 		if (v1 && (!Injection || ShowVoltage) ) {
 			document.getElementById("l2").style.display = "block"
 			document.getElementById("fases").innerHTML = Phases;
-				
-			let Vmin_now = math.min(v1, v2, v3);
-			let Vmax_now= math.max(v1, v2, v3);
+			
+      //default is 1 phase
+      let Vmin_now = v1;
+			let Vmax_now = v1;
+      if( Phases == 3){
+			  let Vmin_now = math.min(v1, v2, v3);
+			  let Vmax_now = math.max(v1, v2, v3);
+      }
 			
 			//min - max waarde
-			if (minV == 0.0 || Vmin_now < minV) { minV = Vmin_now; }
+			if (Vmin_now < minV) { minV = Vmin_now; }
 			if (Vmax_now > maxV) { maxV = Vmax_now; }
 			document.getElementById(`power_delivered_2max`).innerHTML = Number(maxV.toFixed(1)).toLocaleString();
 			document.getElementById(`power_delivered_2min`).innerHTML = Number(minV.toFixed(1)).toLocaleString();   
@@ -672,7 +694,15 @@ function UpdateDash()
 			document.getElementById(`power_delivered_1max`).innerHTML = Number(maxKW.toFixed(3)).toLocaleString(undefined, {minimumFractionDigits: 3, maximumFractionDigits: 3} );                    
 			document.getElementById(`power_delivered_1min`).innerHTML = Number(minKW.toFixed(3)).toLocaleString(undefined, {minimumFractionDigits: 3, maximumFractionDigits: 3} );                        
 		}
-		
+
+    //by mar10us
+    if( TariefMode == "variabel")
+    {
+      document.getElementById(`Pmax`).style.color = null;
+      document.getElementById(`Pmin`).style.color = null;
+      document.getElementById(`Pmax`).innerHTML = "\u20AC " + nCurrentEnergyPriceELEKTRA.toFixed(3);
+      document.getElementById(`Pmin`).innerHTML = CurrentProvider;
+    }
 
 		if (!EnableHist) {Spinner(false);return;}
 		
@@ -725,6 +755,7 @@ function UpdateDash()
 			document.getElementById("Pa").innerHTML = Number(Parra[0]).toLocaleString(undefined, {minimumFractionDigits: 3, maximumFractionDigits: 3} );
 		}
 		} //!= p1-q
+
 		//-------GAS METER	
 		if ( HeeftGas && (Dongle_Config != "p1-q") && !IgnoreGas ) 
 		{
@@ -739,6 +770,12 @@ function UpdateDash()
 			for(let i=0;i<3;i++) trend_g.data.datasets[i].data=[Number(Garr[i]).toFixed(1),Number(Gmax-Garr[i]).toFixed(1)];
 			trend_g.update();
 			document.getElementById("G").innerHTML = Number(Garr[0]).toLocaleString(undefined, {minimumFractionDigits: 3, maximumFractionDigits: 3} );
+      
+      //display dynamic prices
+      if (TariefMode == "variabel"){
+        document.getElementById("Gmax").innerHTML = "\u20AC " + nCurrentEnergyPriceGAS.toFixed(3);
+        document.getElementById("Gmin").innerHTML = CurrentProvider;
+      }
 		}
 		
 		//-------WATER METER	
@@ -847,8 +884,13 @@ function handle_menu_click()
 	trend_w = new Chart(document.getElementById("container-7"), TrendW);
 	gauge3f = new Chart(document.getElementById("gauge3f"), Trend3f);
 	gaugeV = new Chart(document.getElementById("gauge-v"), TrendV);
-            
+  
 	handle_menu_click();
+
+  //by mar10us
+  readProvidersEnever();
+  readEnergyTariffs();
+
 	FrontendConfig();
     refreshDevTime();
     clearInterval(timeTimer);  
@@ -1187,10 +1229,12 @@ function show_hide_column2(table, col_no, do_show) {
           Injection=json.Injection;
           Phases=json.Phases;   
           HeeftGas=json.GasAvailable;
-		  "Act_Watt" in json ? Act_Watt = json.Act_Watt : Act_Watt = false;
+
+      "Act_Watt" in json ? Act_Watt = json.Act_Watt : Act_Watt = false;
 		  "AvoidSpikes" in json ? AvoidSpikes = json.AvoidSpikes : AvoidSpikes = false;
           "IgnoreInjection" in json ? IgnoreInjection = json.IgnoreInjection : IgnoreInjection = false;
           "IgnoreGas" in json ? IgnoreGas = json.IgnoreGas : IgnoreGas = false;
+
           for (var item in data) 
           {
 //           	console.log("config item: " +item);
@@ -2692,6 +2736,168 @@ function show_hide_column2(table, col_no, do_show) {
 
   } // readGitHubVersion()
 
+  //============================================================================
+  function parseData(data, source)
+  {
+    console.log("parseData() for " + source);
+    switch(source)
+    {
+      case "DAGTARIEVEN_ELEKTRA":
+        parseTarievenVandaagELEKTRA(data);
+        break;
+  
+      case "DAGTARIEVEN_ELEKTRA_GISTEREN":
+        //parseEnergieTarieven(data, false);
+        break;
+  
+      case "DAGTARIEVEN_GAS":
+        parseTarievenVandaagGAS(data);
+        break;
+  
+      case "PROVIDERS_ENEVER":
+        parseProvidersEnever(data);
+        break;
+  
+      default:
+        //debug jsonfile
+        console.log("No handler for source:" + source);
+        for (let i in data) {
+          console.log("[" + i + "] = " + JSON.stringify(data[i]));
+        }
+    }  
+  }
+  function parseTarievenVandaagGAS(json)
+  {
+    console.log(json.status);
+    console.log(json.code);
+
+    //there is only entry
+    line= json.data[0];
+    /*for(i in json.data)
+    {
+      line = json.data[i];
+      console.log(line.datum);
+      console.log(line);
+    }*/    
+
+    //check if date match
+    const dateNOW = new Date();
+    const dateJSON = new Date(line.datum);
+    if( dateNOW.getDate() == dateJSON.getDate())
+    {
+      //data is valid
+
+      //pick cheapest inkoopprijs as default
+      nPriceGAS = Math.min( line.prijsEGSI, line.prijsEOD);
+
+      //select provider for verkoopprijs
+      provcode = getEneverProviderCode( CurrentProvider );
+      if (provcode !== "")
+      {
+        //get provcode in line
+        if( line.hasOwnProperty("prijs" + provcode) )
+        {
+          nPriceGAS = line["prijs"+provcode];
+        }
+      }
+      nCurrentEnergyPriceGAS = parseFloat(nPriceGAS);
+    }
+  }
+  function parseTarievenVandaagELEKTRA(json)
+  {
+    //print json data
+    /*
+    console.log(json.status);
+    console.log(json.code);
+    for(i in json.data)
+    {
+      line = json.data[i];
+      console.log(line.datum, line.prijs);
+    }
+    */
+
+    //
+    var fValid = false;
+    //get current hour
+    const dateNOW = new Date();
+    let hour = dateNOW.getHours();
+    //get index from json
+    line = json.data[hour];
+    //check current date
+    const dateJSON = new Date(line.datum);
+    if( dateNOW.getDate() != dateJSON.getDate())
+    {
+      return;
+    }
+
+    //select provider for verkoopprijs
+    provcode = getEneverProviderCode( CurrentProvider );
+
+    //get inkoop prijs
+    nPrice = line.prijs;
+    if (provcode !== "")
+    {
+      //get provcode in line
+      if( line.hasOwnProperty("prijs" + provcode) )
+      {
+        nPrice = line["prijs"+provcode];
+      }
+    }
+    nCurrentEnergyPriceELEKTRA = parseFloat(nPrice);    
+  }
+
+  function readEnergyTariffs() 
+  {  
+    console.log("readEnergyTariffs()");
+    fetchDataJSON(URL_LOCAL_DAYTARIFF_ELEKTRA, "DAGTARIEVEN_ELEKTRA");
+    fetchDataJSON(URL_LOCAL_DAYTARIFF_GAS,     "DAGTARIEVEN_GAS");
+    //fetchDataJSON(URL_LOCAL_DAYTARIFF_ELEKTRA_YESTERDAY, "DAGTARIEVEN_ELEKTRA_GISTEREN");
+    //fetchDataJSON(URL_LOCAL_DAYTARIFF_GAS_YESTERDAY,     "DAGTARIEVEN_GAS_GISTER");
+    console.log("~readEnergyTariffs()");
+  }
+
+  function parseProvidersEnever(data)
+  {
+    listProviders = data.providers;
+  }
+
+  function readProvidersEnever()
+  {
+    fetchDataJSON(URL_LOCAL_PROVIDERS, "PROVIDERS_ENEVER");
+  }
+
+  //get the ENEVER code for the currently selected provider
+  function getEneverProviderCode(providername)
+  {
+    provcode = "";
+    for( prov in listProviders)
+    { 
+      if (listProviders[prov].name == providername)
+      {
+        provcode = listProviders[prov].code;
+      }
+    }
+    return provcode;
+  }
+
+  function fetchDataJSON(url, source)
+  {
+    console.log("fetchDataJSON()");
+    Spinner(true);
+    fetch(url)
+      .then(response => response.json())
+      .then(json => {
+        //TODO: refactor with fnptr
+        parseData(json, source);
+        Spinner(false);
+      })
+      .catch(function (error) {
+        var p = document.createElement('p');
+        p.appendChild(
+          document.createTextNode('Error: ' + error.message)
+        );
+      });
+  };
     
   //============================================================================  
   function setEditType(eType) {
@@ -2972,6 +3178,9 @@ function show_hide_column2(table, col_no, do_show) {
 		  ,[ "pre40",				  	  "SMR 2 & 3 support"]
 		  ,[ "raw-port",				  "Telegram op poort 82"]
 		  ,[ "led-prt",				  	  "Bridge leds aan/uit"]
+      ,[ "enevertoken",				  "Token voor het ophalen van dynamische tarieven via de Enever.nl API"]
+      ,[ "TariefMode", "Mode voor de tarieven; Kies uit 'vast' of 'variabel'"]
+      ,[ "CurrentProvider", "Huidige aanbieder voor variabel tarief"]
 		  		  		  
 ];
 

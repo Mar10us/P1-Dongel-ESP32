@@ -106,6 +106,7 @@ void writeSettings()
   doc["act-json-mqtt"] = bActJsonMQTT;
   doc["raw-port"] = bRawPort;
   doc["led-prt"] = bLED_PRT;
+
   writeToJsonFile(doc, SettingsFile);
   
 } // writeSettings()
@@ -153,6 +154,10 @@ void readSettings(bool show)
   //strcpy(LittleFSTimestamp, doc["Timestamp"]);
   strcpy(settingHostname, doc["Hostname"] | _DEFAULT_HOSTNAME );
   strcpy(settingIndexPage, doc["IndexPage"] | _DEFAULT_HOMEPAGE);
+
+  //by: vdwel  
+  strcpy(eneverToken, doc["EneverToken"] | _DEFAULT_ENEVER_TOKEN);
+  
   settingEDT1 = doc["EnergyDeliveredT1"];
   settingEDT2 = doc["EnergyDeliveredT2"];
   settingERT1 = doc["EnergyReturnedT1"];
@@ -353,6 +358,11 @@ void updateSetting(const char *field, const char *newValue)
     strcat(ota_url, newValue);
     strCopy(BaseOTAurl,sizeof(ota_url), ota_url ); 
   }
+
+  //by: vdwel
+  if (!stricmp(field, "enevertoken")){
+    strCopy(eneverToken, 19, newValue); 
+  }   
   
   //booleans
   if (!stricmp(field, "led")) LEDenabled = (stricmp(newValue, "true") == 0?true:false); 
