@@ -31,23 +31,42 @@ var actWaterData          = {};     // declare an object
 actWaterData.labels       = [];     //  add 'labels' element to object (X axis)
 actWaterData.datasets     = [];     //  add 'datasets' array element to object
 
-
 var actElectrOptions = {
-		plugins: {labels: false},
-        responsive: true,
-        maintainAspectRatio: true,
-        scales: {
-          yAxes: [{
-            ticks : {
-              beginAtZero : true
-            },
-            scaleLabel: {
-              display: true,
-              labelString: 'kilo Watt',
-            },
-          }]
-        } // scales
-      }; // options
+	plugins:{
+		labels: false,
+		legend:{
+			position: 'right',
+		},
+		title: {
+			display: true,
+			text: 'ELECTRA VERBRUIK',
+		}
+	},
+	responsive: true,
+	maintainAspectRatio: true,
+	scales: {
+		x: {
+			type: 'linear',
+			display: true,
+			position: 'left',
+			beginAtZero : true,
+			title: {
+				display: true,
+				text: 'Tijdstip'
+			}
+		},
+		y: {
+			type: 'linear',
+			display: true,
+			position: 'left',
+			beginAtZero : true,
+			title: {
+				display: true,
+				text: 'kWh'
+			}
+		}
+	} // scales
+}; // options
 
 var hourOptions = {
 		plugins: {labels: false},
@@ -84,21 +103,122 @@ var dayOptions = {
       }; // options
 
 var monthOptions = {
-		plugins: {labels: false},
+	plugins:{
+		labels: false,
+		legend:{
+			position: 'right',
+		},
+		title: {
+			display: true,
+			text: 'ELECTRA VERBRUIK',
+		}
+	},
+	responsive: true,
+	maintainAspectRatio: true,
+	scales: {
+		x: {
+			title: {
+				display: true,
+				text: 'Maanden'
+			}
+		},
+		y: {
+			type: 'linear',
+			display: true,
+			position: 'left',
+			beginAtZero : true,
+			title: {
+				display: true,
+				text: 'kWh'
+			}
+		}
+	} // scales
+}; // options
+
+var cfgWATER =  {
+	type: 'line',
+	data: [],
+	options: {
+	  plugins:{
+		  legend:{
+			  position: 'right',
+		  },
+		  title: {
+			  display: true,
+			  text: 'WATER VERBRUIK',
+		  }
+	  },
+	  responsive: true,
+	  maintainAspectRatio: true,
+	  scales: {
+		  x: {
+			  type: 'linear',
+			  display: true,
+			  position: 'left',
+			  beginAtZero : true,
+			  title: {
+				  display: true,
+				  text: 'Maanden'
+			  }
+		  },
+		  y: {
+			  type: 'linear',
+			  display: true,
+			  position: 'left',
+			  beginAtZero : true,
+			  title: {
+				  display: true,
+				  text: "m3"
+			  }
+		  }
+	  } // scales
+	} // options
+};
+
+var cfgGASCHART = {
+	type: 'line',
+	options: {
+		interaction: {
+			intersect: false,
+			mode: 'index',
+		},
+		plugins:{
+			legend:{
+				position: 'right'
+			},
+			title: {
+				display: true,
+				text: '=== ===',					
+			},
+			tooltip: {
+				callbacks: {}
+			}
+		},
 		responsive: true,
-        maintainAspectRatio: true,
-        scales: {
-          yAxes: [{
-            ticks : {
-              beginAtZero : true
-            },
-            scaleLabel: {
-              display: true,
-              labelString: 'kWh',
-            },
-          }]
-        } // scales
-      }; // options
+		maintainAspectRatio: true,
+		scales: {
+			x: {				
+				title: {
+					font:{size: 12},
+					display: true,
+					text: '--==--'
+				}
+			},
+			y: {
+				type: 'linear',
+				display: true,
+				position: 'left',
+				beginAtZero : true,
+				font:{size: 12},
+				title: {
+					font:{size: 12},
+					display: true,
+					text: "---"
+				}
+			}
+		} // scales
+	} // options
+};
 
 //----------------Chart's-------------------------------------------------------
 var myElectrChart;
@@ -131,26 +251,10 @@ var myWaterChart;
     }
 
     var ctxWater = document.getElementById("waterChart").getContext("2d");
-    myWaterChart = new Chart(ctxWater, {
-      type: 'line',
-      data: dataSet,
-      options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        scales: {
-          yAxes: [{
-            ticks : {
-              beginAtZero : true,
-            },
-            scaleLabel: {
-              display: true,
-              labelString: labelString,
-            },
-          }]
-        } // scales
-      } // options
-
-    });
+    cfgWATER.options.plugins.title.text = "WATER VERBRUIK";
+	cfgWATER.options.scales.x.title.text = "Maanden";
+	cfgWATER.options.scales.y.title.text = "m3";
+	myWaterChart = new Chart(ctxWater, cfgWATER);
     
   } // renderWaterChart()
   //============================================================================  
@@ -162,26 +266,9 @@ var myWaterChart;
     }
 
     var ctxGas = document.getElementById("gasChart").getContext("2d");
-    myGasChart = new Chart(ctxGas, {
-      type: 'line',
-      data: dataSet,
-      options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        scales: {
-          yAxes: [{
-            ticks : {
-              beginAtZero : true,
-            },
-            scaleLabel: {
-              display: true,
-              labelString: labelString,
-            },
-          }]
-        } // scales
-      } // options
-
-    });
+    //set footer func and charttitle
+	cfgGASCHART.options.plugins.title.text = "GAS VERBRUIK";
+	myGasChart = new Chart(ctxGas, cfgGASCHART);
     
   } // renderGasChart()
   
@@ -233,6 +320,8 @@ var myWaterChart;
     if (HeeftGas) {
 		if ( Dongle_Config == "p1-q") renderGasChart(gasData, "kJ");
 		else renderGasChart(gasData, "m3");
+		myGasChart.options.scales.x.title.text = "Maanden";
+		myGasChart.options.scales.y.title.text = "m3";
 		myGasChart.update();
 		document.getElementById("gasChart").style.display = "block";
     }  

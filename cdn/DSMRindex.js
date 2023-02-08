@@ -74,311 +74,316 @@ var hist_arrW=[4], hist_arrG=[4], hist_arrPa=[4], hist_arrPi=[4], hist_arrP=[4];
 var day = 0;
 
 let TrendV = {
-    type: 'doughnut',
-    data: {
-      datasets: [
-        {
-          label: "l1",
-          backgroundColor: ["#314b77", "rgba(0,0,0,0.1)"],
-        },
-        {
-          label: "l2",
-          backgroundColor: ["#316b77", "rgba(0,0,0,0.1)"],
-        },
-        {
-          label: "l3",
-          backgroundColor: ["#318b77", "rgba(0,0,0,0.1)"],
-        }
-      ]
+  type: 'doughnut',
+  data: {
+    datasets: [
+      {
+        label: "L1",
+        backgroundColor: ["#314b77", "rgba(0,0,0,0.1)"],
+      },
+      {
+        label: "L2",
+        backgroundColor: ["#316b77", "rgba(0,0,0,0.1)"],
+      },
+      {
+        label: "L3",
+        backgroundColor: ["#318b77", "rgba(0,0,0,0.1)"],
+      }]
+  },
+  options: {
+    events: [],   
+    responsive: true,
+    circumference: 180,
+    rotation: 270,
+    animation:{
+      animateRotate: true
     },
-    options: {
-    events: [],
-    title: {
-            display: true,
-            text: 'Voltage',
-            position: "bottom",
-            padding: -18,
-            fontSize: 17,
-            fontColor: "#000",
-            fontFamily:"Dosis",
+    plugins: {
+      title: {
+        display: true,
+        text: 'Voltage',
+        position: "bottom",
+        padding:{
+          top: -60,
+          bottom: 0
         },
-      responsive:true,
-      circumference: Math.PI,
-	  rotation: -Math.PI,
-      plugins: {
-      	labels: {
-			render: function (args) {
-				return args.value + 207 + " V";
-			},//render
+        font:{size: 18},
+      },
+      legend: { display: false },
+
+      //create arc-ed labels with the labels-plugin
+      labels: {        
+        render: function (args) {
+          return args.value + 200 + " V";
+        },
         arc: true,
-        fontColor: ["#fff","rgba(0,0,0,0)"],
-      },//labels      
+        fontColor: ["#fff", "rgba(0,0,0,0)"],
+      },//labels
+
     }, //plugins
-    legend: {display: false},
-    }, //options
+    legend: { display: false },
+  }, //options
 };
 
 let TrendG = {
-    type: 'doughnut',
-    data: {
-      labels: ["verbruik", "verschil met hoogste"],
-      datasets: [
-        {
-          label: "vandaag",
-          backgroundColor: ["#314b77", "rgba(0,0,0,0.1)"],
+  type: 'doughnut',
+  data: {
+    labels: ["verbruik", "verschil met hoogste"],
+    datasets: [
+      {
+        label: "vandaag",
+        backgroundColor: ["#314b77", "rgba(0,0,0,0.1)"],
+      },
+      {
+        label: "gisteren",
+        backgroundColor: ["#316b77", "rgba(0,0,0,0.1)"],
+      },
+      {
+        label: "eergisteren",
+        backgroundColor: ["#318b77", "rgba(0,0,0,0.1)"],
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    circumference: 180,
+    rotation: 270,
+    plugins: {
+      title: {
+        display: true,
+        text: 'm3',
+        position: "bottom",
+        padding:{
+          top: -60,
+          bottom: 0
         },
-        {
-          label: "gisteren",
-          backgroundColor: ["#316b77", "rgba(0,0,0,0.1)"],
-        },
-        {
-          label: "eergisteren",
-          backgroundColor: ["#318b77", "rgba(0,0,0,0.1)"],
-        }
-      ]
-    },
-    options: {
-    title: {
-            display: true,
-            text: 'm3',
-            position: "bottom",
-            padding: -18,
-            fontSize: 17,
-            fontColor: "#000",
-            fontFamily:"Dosis",
-        },
-      responsive:true,
-      circumference: Math.PI,
-			rotation: -Math.PI,
-      plugins: {
+        font:{size: 17},
+      },
+      legend: { display: false },
+
+      //works with the plugin
       labels: {
         render: function (args) {
           return args.value + " \u33A5";
-        },//render
+        },
         arc: true,
-        fontColor: ["#fff","rgba(0,0,0,0)"],
-      },//labels      
-    }, //plugins
-    legend: {display: false},
-    }, //options
+        fontColor: ["#fff", "rgba(0,0,0,0)"],
+      },//labels
+
+    }, //plugins    
+  }, //options
 };
 
-
 let TrendQ = {
-    type: 'doughnut',
-    data: {
-      labels: ["verbruik", "verschil met hoogste"],
-      datasets: [
-        {
-          label: "vandaag",
-          backgroundColor: ["#314b77", "rgba(0,0,0,0.1)"],
-        },
-        {
-          label: "gisteren",
-          backgroundColor: ["#316b77", "rgba(0,0,0,0.1)"],
-        },
-        {
-          label: "eergisteren",
-          backgroundColor: ["#318b77", "rgba(0,0,0,0.1)"],
-        }
-      ]
-    },
-    options: {
+  type: 'doughnut',
+  data: {
+    labels: ["verbruik", "verschil met hoogste"],
+    datasets: [
+      {
+        label: "vandaag",
+        backgroundColor: ["#314b77", "rgba(0,0,0,0.1)"],
+      },
+      {
+        label: "gisteren",
+        backgroundColor: ["#316b77", "rgba(0,0,0,0.1)"],
+      },
+      {
+        label: "eergisteren",
+        backgroundColor: ["#318b77", "rgba(0,0,0,0.1)"],
+      }
+    ]
+  },
+  options: {
     title: {
-            display: true,
-            text: 'kJ',
-            position: "bottom",
-            padding: -18,
-            fontSize: 17,
-            fontColor: "#000",
-            fontFamily:"Dosis",
-        },
-      responsive:true,
-      circumference: Math.PI,
-			rotation: -Math.PI,
-      plugins: {
+      display: true,
+      text: 'kJ',
+      position: "bottom",
+      padding: {top: -60},
+      font:{size: 17},
+    },
+    responsive: true,
+    circumference: 180,
+    rotation: 270,
+    plugins: {
       labels: {
         render: function (args) {
           return args.value;
         },//render
         arc: true,
-        fontColor: ["#fff","rgba(0,0,0,0)"],
+        fontColor: ["#fff", "rgba(0,0,0,0)"],
       },//labels      
     }, //plugins
-    legend: {display: false},
-    }, //options
+    legend: { display: false },
+  }, //options
 };
 
-
 let Trend3f = {
-    type: 'doughnut',
-    data: {
-      labels: ["verbruik", "verschil met hoogste"],
-      datasets: [
-        {
-          label: "l1",
-          backgroundColor: ["#314b77", "rgba(0,0,0,0.1)"],
-        },
-        {
-          label: "l2",
-          backgroundColor: ["#316b77", "rgba(0,0,0,0.1)"],
-        },
-        {
-          label: "l3",
-          backgroundColor: ["#318b77", "rgba(0,0,0,0.1)"],
-        }
-      ]
-    },
-    options: {
-    title: {
-            display: true,
-            text: 'Ampere',
-            position: "bottom",
-            padding: -18,
-            fontSize: 17,
-            fontColor: "#000",
-            fontFamily:"Dosis",
-        },
-      responsive:true,
-      circumference: Math.PI,
-			rotation: -Math.PI,
-      plugins: {
+  type: 'doughnut',
+  font:{size:1},
+  data: {
+    labels: ["verbruik", "verschil met hoogste"],
+    datasets: [
+      {
+        label: "l1",
+        backgroundColor: ["#314b77", "rgba(0,0,0,0.1)"],
+      },
+      {
+        label: "l2",
+        backgroundColor: ["#316b77", "rgba(0,0,0,0.1)"],
+      },
+      {
+        label: "l3",
+        backgroundColor: ["#318b77", "rgba(0,0,0,0.1)"],
+      }
+    ]
+  },
+  options: {    
+    responsive: true,
+    circumference: 180,
+    rotation: 270,
+    plugins: {
+      title: {
+        display: true,
+        text: 'Ampere',
+        position: "bottom",
+        padding: {top: -60},
+        font:{size: 17},
+      },
+      legend: { display: false },
       labels: {
         render: function (args) {
           return args.value + " A";
         },//render
         arc: true,
-        fontColor: ["#fff","rgba(0,0,0,0)"],
+        fontColor: ["#fff", "rgba(0,0,0,0)"],
       },//labels      
     }, //plugins
-    legend: {display: false},
-    }, //options
+  }, //options
 };
 
-
 let TrendW = {
-    type: 'doughnut',
-    data: {
-      labels: ["verbruik", "verschil met hoogste"],
-      datasets: [
-        {
-          label: "vandaag",
-          backgroundColor: ["#314b77", "rgba(0,0,0,0.1)"],
-        },
-        {
-          label: "gisteren",
-          backgroundColor: ["#316b77", "rgba(0,0,0,0.1)"],
-        },
-        {
-          label: "eergisteren",
-          backgroundColor: ["#318b77", "rgba(0,0,0,0.1)"],
-        }
-      ]
-    },
-    options: {
-    title: {
-            display: true,
-            text: 'liter',
-            position: "bottom",
-            padding: -18,
-            fontSize: 17,
-            fontColor: "#000",
-            fontFamily:"Dosis",
-        },
-      responsive:true,
-      circumference: Math.PI,
-			rotation: -Math.PI,
-      plugins: {
+  type: 'doughnut',
+  data: {
+    labels: ["verbruik", "verschil met hoogste"],
+    datasets: [
+      {
+        label: "vandaag",
+        backgroundColor: ["#314b77", "rgba(0,0,0,0.1)"],
+      },
+      {
+        label: "gisteren",
+        backgroundColor: ["#316b77", "rgba(0,0,0,0.1)"],
+      },
+      {
+        label: "eergisteren",
+        backgroundColor: ["#318b77", "rgba(0,0,0,0.1)"],
+      }
+    ]
+  },
+  options: {    
+    responsive: true,
+    circumference: 180,
+    rotation: 270,
+    plugins: {
+      title: {
+        display: true,
+        text: 'liter',
+        position: "bottom",
+        padding: {top: -60},
+        font:{size: 17},
+      },
+      legend: { display: false },
       labels: {
         render: function (args) {
           return args.value + " ltr";
         },//render
         arc: true,
-        fontColor: ["#fff","rgba(0,0,0,0)"],
+        fontColor: ["#fff", "rgba(0,0,0,0)"],
       },//labels      
     }, //plugins
-    legend: {display: false},
-    }, //options
+    legend: { display: false },
+  }, //options
 };
 
 let optionsP = {
-title: {
-            display: true,
-            text: 'kWh',
-            position: "bottom",
-            padding: -18,
-            fontSize: 17,
-            fontColor: "#000",
-            fontFamily:"Dosis",
-        },
-      responsive:true,
-      circumference: Math.PI,
-		rotation:  - Math.PI,
-      plugins: {
-      labels: {
-        render: function (args) {
-          return args.value + " kWh";
-        },//render
-        arc: true,
-        fontColor: ["#fff","rgba(0,0,0,0)"],
-      },//labels      
-    }, //plugins
-      legend: {display: false},
-}; 
-    
+  
+  responsive: true,
+  circumference: 180,
+  rotation: 270,
+  plugins: {
+    title: {
+      display: true,
+      text: 'kWh',
+      position: "bottom",
+      padding: {top: -60},
+      font:{size: 17},
+    },
+    legend: { display: false },
+    labels: {
+      render: function (args) {
+        return args.value + " kWh";
+      },//render
+      arc: true,
+      fontColor: ["#fff", "rgba(0,0,0,0)"],
+    },//labels      
+  }, //plugins  
+};
+
+//===========================================================================
+
 let dataP = {
-      labels: ["verbruik", "verschil met hoogste"],
-      datasets: [
-        {
-          label: "vandaag",
-          backgroundColor: ["#314b77", "rgba(0,0,0,0.1)"],
-        },
-        {
-          label: "gisteren",
-          backgroundColor: ["#316b77", "rgba(0,0,0,0.1)"],
-        },
-        {
-          label: "eergisteren",
-          backgroundColor: ["#318b77", "rgba(0,0,0,0.1)"],
-        }
-      ]
+  labels: ["verbruik", "verschil met hoogste"],
+  datasets: [
+    {
+      label: "vandaag",
+      backgroundColor: ["#314b77", "rgba(0,0,0,0.1)"],
+    },
+    {
+      label: "gisteren",
+      backgroundColor: ["#316b77", "rgba(0,0,0,0.1)"],
+    },
+    {
+      label: "eergisteren",
+      backgroundColor: ["#318b77", "rgba(0,0,0,0.1)"],
+    }
+  ]
 };
 
 let dataPi = {
-      labels: ["verbruik", "verschil met hoogste"],
-      datasets: [
-        {
-          label: "vandaag",
-          backgroundColor: ["#314b77", "rgba(0,0,0,0.1)"],
-        },
-        {
-          label: "gisteren",
-          backgroundColor: ["#316b77", "rgba(0,0,0,0.1)"],
-        },
-        {
-          label: "eergisteren",
-          backgroundColor: ["#318b77", "rgba(0,0,0,0.1)"],
-        }
-      ]
-	};
+  labels: ["verbruik", "verschil met hoogste"],
+  datasets: [
+    {
+      label: "vandaag",
+      backgroundColor: ["#314b77", "rgba(0,0,0,0.1)"],
+    },
+    {
+      label: "gisteren",
+      backgroundColor: ["#316b77", "rgba(0,0,0,0.1)"],
+    },
+    {
+      label: "eergisteren",
+      backgroundColor: ["#318b77", "rgba(0,0,0,0.1)"],
+    }
+  ]
+};
 
 let dataPa = {
-      labels: ["verbruik", "verschil met hoogste"],
-      datasets: [
-        {
-          label: "vandaag",
-          backgroundColor: ["#314b77", "rgba(0,0,0,0.1)"],
-        },
-        {
-          label: "gisteren",
-          backgroundColor: ["#316b77", "rgba(0,0,0,0.1)"],
-        },
-        {
-          label: "eergisteren",
-          backgroundColor: ["#318b77", "rgba(0,0,0,0.1)"],
-        }
-      ]
-    };
+  labels: ["verbruik", "verschil met hoogste"],
+  datasets: [
+    {
+      label: "vandaag",
+      backgroundColor: ["#314b77", "rgba(0,0,0,0.1)"],
+    },
+    {
+      label: "gisteren",
+      backgroundColor: ["#316b77", "rgba(0,0,0,0.1)"],
+    },
+    {
+      label: "eergisteren",
+      backgroundColor: ["#318b77", "rgba(0,0,0,0.1)"],
+    }
+  ]
+};
 
 window.onload=bootsTrapMain;
 
