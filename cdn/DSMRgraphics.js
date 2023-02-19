@@ -12,6 +12,11 @@
 //store last 90 TELEGRAM objects
 const MAX_TELEGRAM_HISTORY = 15 * 6;
 var listTELEGRAMS = [];
+const listChartTypes = [
+  {type:"SLIDING_REVERSED", name:"Achteruit Schuivend"}, 
+  {type:"STATIC_NORMAL", name:"Normaal Vast"}
+];
+
 let TimerActual;
 let actPoint        = 0;
 let maxPoints       = 100;
@@ -127,6 +132,7 @@ function ensureChartsReady()
 }
 
   //============================================================================  
+  /*
   function renderElectrChart(dataSet, options) {
     //console.log("Now in renderElectrChart() ..");
     
@@ -176,8 +182,39 @@ function ensureChartsReady()
     });
     
   } // renderGasChart()
+  */
+
+  //voor gebruik in dropdown menu
+  function getChartTypes()
+  {
+    return listChartTypes;
+  }
+
+  function showGraph( type, period, data)
+  {
+    switch(type)
+    {
+      case "REVERSED_SLIDING": 
+        if (period == "Hours") showGraphREVERSED_HOURS(data);
+        else showGraphREVERSED_DAYS(data);
+        break;
+
+      case "NORMAL_STATIC": 
+        if (period == "Hours")  showGraphSTATIC_HOURS(data);
+        else                    showGraphSTATIC_DAYS(data);
+        break;
+    }
+  }
   
-  
+  //Two redirect functions
+  function showGraphREVERSED_DAYS(data)
+  {
+    showHistGraph(data, "Days");
+  }
+  function showGraphREVERSED_HOURS(data)
+  {
+    showHistGraph(data, "Hours");
+  }
   //============================================================================  
   function showHistGraph(data, type)
   {
@@ -661,6 +698,325 @@ function ensureChartsReady()
 
     return [dcEX, dcGX];
   }
+
+
+/* 
+EXPERIMENTEEL
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  //display hour history from 00 till 23 + depth (vandaag,gister,eergister)
+  function showGraphSTATIC_HOURS(data)
+  {
+    var listWIDTH = ["00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23"];
+    var listDEPTH = ["vandaag","gisteren","eergisteren"];
+
+    //prepare data
+    const [hcED, hcER, hcGD, hcWD] = prepareDataForHistoryContainerHOURS(data);
+
+    //convert to datasets for E,G and W
+    var dcEX = createDatasetsForChartSpecial( hcED, hcER, listWIDTH, listDEPTH);
+    var dcGX = createDatasetsForChart( hcGD, listWIDTH, listDEPTH);
+    var dcWX = createDatasetsForChart( hcWD, listWIDTH, listDEPTH);
+
+    //set chartdata
+    myElectrChart.data = dcEX;
+    myGasChart.data = dcGX;
+    myWaterChart.data = dcWX;
+    
+    //update chart
+    myElectrChart.update();
+    myGasChart.update();
+    myWaterChart.update();
+  }
+
+  //display days history from MAA till ZON + depth (deze week,vorige week,twee weken geleden)  
+  function showGraphSTATIC_DAYS(data)
+  {
+    var listWIDTH  = ["Maandag", "Dinsdag", "Woensdag","Donderdag","Vrijdag","Zaterdag", "Zondag"];
+    var listDEPTH = ["deze week","vorige week","twee weken geleden"];
+    //TODO: wat als 31 dagen (= 5 weken) ? drie en vier weken geleden? of weeknummers?
+
+    //prepare data
+    const [hcED, hcER, hcGD, hcWD] = prepareDataForHistoryContainerDAYS(data);
+
+    //convert to datasets Elektra, Gas, Water
+    var dcEX = createDatasetsForChartSpecial( hcED, hcER, listWIDTH, listDEPTH);
+    var dcGX = createDatasetsForChart( hcGD, listWIDTH, listDEPTH);
+    var dcWX = createDatasetsForChart( hcWD, listWIDTH, listDEPTH);
+
+    //set chartdata
+    myElectrChart.data = dcEX;
+    myGasChart.data = dcGX;
+    myWaterChart.data = dcWX;
+    
+    //update chart
+    myElectrChart.update();
+    myGasChart.update();
+    myWaterChart.update();
+  }
+ 
+  //display month history from JAN till DEC + depth (dit jaar, vorig jaar,twee jaar gelden)
+  function showGraphSTATIC_MONTHS(data)
+  {
+    var listWIDTH  = ["JAN", "FEB", "MRT","APR","MEI","JUN", "JUL", "AUG","SEP", "OKT", "NOV", "DEC"];
+    var listDEPTH = ["dit jaar","vorig jaar","twee jaar geleden"];
+
+    //prepare data
+    const [hcED, hcER, hcGD, hcWD] = prepareDataForHistoryContainerMONTHS(data);
+
+    //convert to datasets
+    var dcEX = createDatasetsForChartSpecial( hcED, hcER, listWIDTH, listDEPTH);
+    var dcGX = createDatasetsForChart( hcGD, listWIDTH, listDEPTH );
+    var dcWX = createDatasetsForChart( hcWD, listWIDTH, listDEPTH );
+
+    //set chartdata
+    myElectrChart.data = dcEX;
+    myGasChart.data = dcGX;
+    myWaterChart.data = dcWX;
+    
+    //update chart
+    myElectrChart.update();
+    myGasChart.update();
+    myWaterChart.update();
+  }
+
+
+
+
+
+
+
+  // create for one color a list where alphablend is 50% of the previous color
+  // e.g.
+  //    factor=2 --> 100%, 50%, 25%, 12,5%, 6,25%, etc
+  //    factor=3 --> 100%, 33.3%, 11.1%, 3,7%, etc
+  //    factor=4 --> 100%, 25%, 6,25%, etc
+  function createAlphaList(rgb, nDepth, nFactor)
+  {
+    var listCOLORS = [];    
+    var nA = 1;
+    for(var i=0; i<nDepth; i++)
+    {
+      color = "rgba(" + rgb + "," + nA.toString() + ")";
+      listCOLORS.push(color);
+      nA = (nA/nFactor).toFixed(3);
+    }
+    return listCOLORS;
+  }
+
+  //combine datasets for returns 
+  function createDatasetsForChartSpecial(hcDX, hcRX, listLABELS_X, listDATASETS)
+  {    
+    var dcDX = createChartDataContainer();
+
+    //create a alphablend for one color
+    var listCOLORS1 = createAlphaList( "255,0,0", listDATASETS.length, 2 );
+    var listCOLORS2 = createAlphaList( "0,255,0", listDATASETS.length, 2 );
+
+    //create datasets for BAR chart
+    const [dsED1, dsED2, dsED3] = createHistoryDatasetsBAR( listCOLORS1, listDATASETS);
+    const [dsER1, dsER2, dsER3] = createHistoryDatasetsBAR( listCOLORS2, listDATASETS);
+
+    //TODO NETTO datasets????
+
+    //fill datasets with historycontainers
+    //TODO
+    
+    //add to chartcontainer
+    dcDX.labels = listLABELS_X;
+    dcDX.datasets.push(dsED1);
+    dcDX.datasets.push(dsED2);
+    dcDX.datasets.push(dsED3);
+    dcDX.datasets.push(dsER1);
+    dcDX.datasets.push(dsER2);
+    dcDX.datasets.push(dsER3);
+    return dcDX;
+  }
+
+  //single triple datasets
+  function createDatasetsForChart( hcDX, listLABELS_X, listDATASETS )
+  {
+    var dcDX = createChartDataContainer();
+    
+    //create a alphablend for color RED
+    var listCOLORS1 = createAlphaList( "255,0,0", listDATASETS.length, 2 );
+    //or create your own list
+    //var listCOLORS1 = ["rgba(255,0,0,1)", "rgba(0,255,0,1)", "rgba(0,0,255,1)"];
+    
+    //create datasets for LINE chart
+    const [dsXD1, dsXD2, dsXD3] = createHistoryDatasetsLINE( listCOLORS1, listDATASETS);
+
+    //fill data
+    //TODO
+    
+    //add to chartcontainer
+    dcDX.labels = listLABELS_X;
+    dcDX.datasets.push(dsXD1);
+    dcDX.datasets.push(dsXD2);
+    dcDX.datasets.push(dsXD3);
+
+    //return datacontainer
+    return dcDX;
+  }
+
+  //create 3 datasets in one go
+  function createHistoryDatasetsBAR(rgb, listColors, listLabels)
+  {
+    var dsX1 = createDatasetBAR(false, listColors[0], listLabels[0], 'STACK_A');
+    var dsX2 = createDatasetBAR(false, listColors[1], listLabels[1], 'STACK_B');
+    var dsX3 = createDatasetBAR(false, listColors[2], listLabels[2], 'STACK_A'); //The first and lst will never overlap, so can use the same 'stack'
+    return [dsX1, dsX2, dsX3];
+  }
+
+   //create 3 datasets LINE in one go
+   function createHistoryDatasetsLINE(rgb, listColors, listLabels)
+   {
+     var dsX1 = createDatasetLINE(false, listColors[0], listLabels[0]);
+     var dsX2 = createDatasetLINE(false, listColors[1], listLabels[1]);
+     var dsX3 = createDatasetLINE(false, listColors[2], listLabels[2]);
+     return [dsX1, dsX2, dsX3];
+   }
+
+  //create a container for history data and init with null
+  function createHistoryContainer(width, depth)
+  {
+    hs = [];
+    hs.current = new Array(width);
+    hs.previous = new Array(width);
+    hs.preprevious = new Array(width);
+    fillArrayNULL(hs.current);
+    fillArrayNULL(hs.previous);
+    fillArrayNULL(hs.preprevious);
+    hs.history = [];
+    for( var i=0; i<depth-3; i++)
+    {
+      //add more history
+      var arr = new Array(width);
+      fillArrayNULL(arr);
+      hs.history.push(arr);
+    }
+    return hs;
+  }
+
+
+
+
+
+
+
+  //=======================================================================
+  //prepare the data 
+  //divide the data into 3 day-arrays (each 24 days; start=00)
+  function prepareDataForHistoryContainerHOURS(data)
+  {
+    var listLABELS = ["vandaag","gisteren","eergisteren"];
+
+    //create history container
+    var hcED = createHistoryContainer(24,3);
+    var hcER = createHistoryContainer(24,3);
+    var hcGD = createHistoryContainer(24,3);
+    var hcWD = createHistoryContainer(24,3);
+
+    //fill container with data
+    var nSlot = data.actSlot;
+    for(var i=0; i<data.data.length; i++)
+    {
+      var item = data.data[i];
+      var date = item.date;
+      var nYY = date.substring(0,2);
+      var nMM = date.substring(2,4);
+      var nDD = date.substring(4,6);
+      var nHH = parseInt(date.substring(6,8));
+
+      //get values
+      var nED = item.p_edw;
+      var nER = item.p_erw;
+      var nGD = item.p_gd;      
+      var nWD = item.p_wd;
+
+      //store values
+      hcED.current[nHH] = nED;
+      hcER.current[nHH] = nER;
+      hcGD.current[nHH] = nGD;
+      hcWD.current[nHH] = nWD;
+    }
+  }
+
+  //divide the data into 3 week-arrays (each 7 days; start=monday)
+  //example:
+    //  today=14 sep 2023 on donderdag
+    // dc.labels              | M | D | W | D | V | Z | Z || wk# | 
+    //                        |---|---|---|---|---|---|---||-----|
+    // dc.datasets.preprevious| . | . | . | . | 1 | 2 | 3 || n+2 |
+    // dc.datasets.previous   | 4 | 5 | 6 | 7 | 8 | 9 | 10|| n+1 |
+    // dc.datasets.current    | 11| 12| 13| 14| . | . | . || n   |
+    //  with . => null; 
+  //and each resource (E,G or W) has its own history container
+  function prepareDataForHistoryContainerDAYS(data)
+  {
+    var nDays = data.data.length;
+    //with 14 days you need 3 weeks, with 31 days you need 5 weeks
+    var nWeeks = Math.ceil( (nDays+1)/7 );
+
+    var listLABELS = ["deze week","vorige week","twee weken geleden"];
+    //TODO: weeknummers?
+
+    var dcED = createHistoryContainer(7, nWeeks);
+
+    //fill container
+    //TODO
+  }
+
+  //divide the data into 3 year-arrays (each 12 months; start=jan) 
+  function prepareDataForHistoryContainerMONTHS(data)
+  {
+    var listLABELS = ["dit jaar","vorig jaar","twee jaar geleden"];
+    
+    var dcED = createHistoryContainer(12,3);
+
+    //fill container
+    //TODO
+  }  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   
 /*
