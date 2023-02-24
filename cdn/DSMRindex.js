@@ -1446,8 +1446,13 @@ function parseSmFields(data)
         expandData(data);
         if (presentationType == "TAB")
             showHistTable(data, "Hours");
-        else  
-            showHistGraph(data, "Hours");
+        else
+        {
+          setGraphVersion(1);
+          if(presentationType == "GRAPH_STATIC" ) setGraphVersion(2);
+          showHistGraph(data, "Hours");
+          showCharts();
+        }
 	      Spinner(false);
       })
       .catch(function(error) {
@@ -1477,7 +1482,12 @@ function parseSmFields(data)
         expandData(data);
         if (presentationType == "TAB")
               showHistTable(data, "Days");
-        else  showHistGraph(data, "Days");
+        else  {
+          setGraphVersion(1);
+          if(presentationType == "GRAPH_STATIC" ) setGraphVersion(2);
+          showHistGraph(data, "Days");
+          showCharts();
+        }
 		//voor dashboard
         var act_slot = data.actSlot;
 //         console.log("Refreshdays - actSlot: " + act_slot);
@@ -1524,8 +1534,14 @@ function parseSmFields(data)
                 showMonthsCosts(data);
           else  showMonthsHist(data);
         }
-        //else  showMonthsGraph(data,"Days");
-        else  showHistGraph(data, "Months");
+        else  
+        {
+          //graph mode
+          setGraphVersion(1);
+          if(presentationType == "GRAPH_STATIC" ) setGraphVersion(2);
+          showHistGraph(data, "Months");
+          showCharts();
+        }
         Spinner(false);
       })
       .catch(function(error) {
@@ -1639,13 +1655,25 @@ function parseSmFields(data)
     }
 
     //--- hide canvas
-    document.getElementById("dataChart").style.display = "none";
-    document.getElementById("gasChart").style.display  = "none";
-	  document.getElementById("waterChart").style.display  = "none";
+    hideCharts();
     //--- show table
     document.getElementById("actual").style.display    = "block";
 
   } // showActualTable()
+
+  function showCharts()
+  {
+    document.getElementById("dataChart" ).style.display = "block";
+    if(HeeftGas) document.getElementById("gasChart"  ).style.display = "block";
+	  if(HeeftWater) document.getElementById("waterChart").style.display = "block";
+  }
+
+  function hideCharts()
+  {
+    document.getElementById("dataChart" ).style.display = "none";
+    document.getElementById("gasChart"  ).style.display = "none";
+	  document.getElementById("waterChart").style.display = "none";
+  }
     
       
   //============================================================================  
@@ -1710,11 +1738,7 @@ function parseSmFields(data)
     };
 
     //--- hide canvas
-    document.getElementById("dataChart").style.display = "none";
-    document.getElementById("gasChart").style.display  = "none";
-	document.getElementById("waterChart").style.display  = "none";
-	
-
+    hideCharts();
 
 	if ( Dongle_Config == "p1-q" ) 	{
 			show_hide_column2('lastHoursTable',1,false);
@@ -1827,9 +1851,8 @@ function parseSmFields(data)
     };
     
     //--- hide canvas
-    document.getElementById("dataChart").style.display  = "none";
-    document.getElementById("gasChart").style.display   = "none";
-	document.getElementById("waterChart").style.display   = "none";
+    hideCharts();
+
     //--- show table
 	if (Dongle_Config == "p1-q") {
   		show_hide_column2('lastMonthsTable', 1,false);
@@ -1970,9 +1993,7 @@ function parseSmFields(data)
 
     
     //--- hide canvas
-    document.getElementById("dataChart").style.display  = "none";
-    document.getElementById("gasChart").style.display   = "none";
-	document.getElementById("waterChart").style.display   = "none";
+    hideCharts();
     //--- show table
     if ( Dongle_Config == "p1-q" ){
 		show_hide_column2('lastMonthsTableCosts', 2,false);
@@ -2040,11 +2061,21 @@ function parseSmFields(data)
         initActualGraph();
 
         //set all other radiogroups to GRAPH
-        //This relies on the groupname to be the same
-        //document.getElementById('aGRAPH').checked = true;
-        //document.getElementById('hGRAPH').checked = true;
-        //document.getElementById('dGRAPH').checked = true;
-        //document.getElementById('mGRAPH').checked = true;
+        if (nGraphVersion == 1){
+          //This relies on the groupname to be the same
+          document.getElementById('aGRAPH').checked = true;
+          document.getElementById('hGRAPH').checked = true;
+          document.getElementById('dGRAPH').checked = true;
+          document.getElementById('mGRAPH').checked = true;
+        }
+
+        if (nGraphVersion == 2){
+          //This relies on the groupname to be the same
+          document.getElementById('aGRAPH').checked = true; //there is no graph2 for ACTUAL, so select the normal graph
+          document.getElementById('hGRAPH2').checked = true;
+          document.getElementById('dGRAPH2').checked = true;
+          document.getElementById('mGRAPH2').checked = true;
+        }
         
         /*        
         document.getElementById('aTAB').checked   = false;        
@@ -2063,13 +2094,13 @@ function parseSmFields(data)
 
         //select all TABs
         //this relies on all radiobuttons in a group shares the same name
-        //document.getElementById('aTAB').checked   = true;
-        //document.getElementById('hTAB').checked   = true;
-        //document.getElementById('dTAB').checked   = true;
-        //document.getElementById('mTAB').checked   = true;
+        document.getElementById('aTAB').checked   = true;
+        document.getElementById('hTAB').checked   = true;
+        document.getElementById('dTAB').checked   = true;
+        document.getElementById('mTAB').checked   = true;
 
         //reset cost checkbox
-        //document.getElementById('mCOST').checked  = false;
+        document.getElementById('mCOST').checked  = false;
 
         /*
         document.getElementById('aGRAPH').checked = false;
