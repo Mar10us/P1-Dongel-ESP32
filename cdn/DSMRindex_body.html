@@ -50,10 +50,10 @@
 	<div>
       <label for="pType"><b>Presentatie: </b></label>
       Tabel
-      <input type="radio" id="hTAB" onchange="setPresentationType('TAB')" checked/>
+      <input type="radio" id="hTAB" name="group_hours" onchange="setPresentationType('TAB')" checked/>
       &nbsp;&nbsp;
       Grafisch
-      <input type="radio" id="hGRAPH" onchange="setPresentationType('GRAPH')"/>
+      <input type="radio" id="hGRAPH" name="group_hours" onchange="setPresentationType('GRAPH')"/>
       &nbsp;&nbsp;
     </div>
     <div id="lastHours">
@@ -86,10 +86,10 @@
     <div>
       <label for="pType"><b>Presentatie: </b></label>
       Tabel
-      <input type="radio" id="dTAB" onchange="setPresentationType('TAB')" checked/>
+      <input type="radio" id="dTAB" name="group_days" onchange="setPresentationType('TAB')" checked/>
       &nbsp;&nbsp;
       Grafisch
-      <input type="radio" id="dGRAPH" onchange="setPresentationType('GRAPH')"/>
+      <input type="radio" id="dGRAPH" name="group_days" onchange="setPresentationType('GRAPH')"/>
       &nbsp;&nbsp;
     </div>
     <div id='lastDays'>
@@ -123,13 +123,13 @@
 	<div>
       <label for="pType"><b>Presentatie: </b></label>
       Tabel
-      <input type="radio" id="mTAB" onchange="setPresentationType('TAB')" checked/>
+      <input type="radio" id="mTAB" name="group_months" onchange="setPresentationType('TAB')" checked/>
       &nbsp;&nbsp;
       Kosten
       <input type="checkbox" id="mCOST" onchange="setMonthTableType()"/>
       &nbsp;&nbsp;
       Grafisch
-      <input type="radio" id="mGRAPH" onchange="setPresentationType('GRAPH')"/>
+      <input type="radio" id="mGRAPH" name="group_months" onchange="setPresentationType('GRAPH')"/>
       &nbsp;&nbsp;
     </div>
     <div id='lastMonths'>
@@ -493,14 +493,14 @@
 <!-- START ActualTab Tab -->
   <section id="ActualTab" class="tabName">
     <!-- START actueelTab Dummy -->
-        <h2>Actueel</h2>
+    <h2>Actueel</h2>
     <div>
         <label for="pType"><b>Presentatie: </b></label>
         Tabel
-        <input type="radio" id="aTAB" onchange="setPresentationType('TAB')" checked/>
+        <input type="radio" id="aTAB" name="group_actual" onchange="setPresentationType('TAB')" checked/>
         &nbsp;&nbsp;
         Grafisch
-        <input type="radio" id="aGRAPH" onchange="setPresentationType('GRAPH')"/>
+        <input type="radio" id="aGRAPH" name="group_actual" onchange="setPresentationType('GRAPH')"/>
         &nbsp;&nbsp;
     </div>
     <div id="actual" >
