@@ -1445,10 +1445,10 @@ function parseSmFields(data)
         data = json;
         expandData(data);
         if (presentationType == "TAB")
-              showHistTable(data, "Hours");
-        else  showHistGraph(data, "Hours");
-	 Spinner(false);
-
+            showHistTable(data, "Hours");
+        else  
+            showHistGraph(data, "Hours");
+	      Spinner(false);
       })
       .catch(function(error) {
         var p = document.createElement('p');
@@ -1524,7 +1524,8 @@ function parseSmFields(data)
                 showMonthsCosts(data);
           else  showMonthsHist(data);
         }
-        else  showMonthsGraph(data,"Days");
+        //else  showMonthsGraph(data,"Days");
+        else  showHistGraph(data, "Months");
         Spinner(false);
       })
       .catch(function(error) {
@@ -2024,38 +2025,64 @@ function parseSmFields(data)
     
   //============================================================================  
   function setPresentationType(pType) {
-    if (pType == "GRAPH") {
-      console.log("Set presentationType to GRAPHICS mode!");
-      presentationType = pType;
-      document.getElementById('aGRAPH').checked = true;
-      document.getElementById('aTAB').checked   = false;
-      initActualGraph();
-      document.getElementById('hGRAPH').checked = true;
-      document.getElementById('hTAB').checked   = false;
-      document.getElementById('dGRAPH').checked = true;
-      document.getElementById('dTAB').checked   = false;
-      document.getElementById('mGRAPH').checked = true;
-      document.getElementById('mTAB').checked   = false;
-      document.getElementById('mCOST').checked  = false;
-      document.getElementById("lastMonthsTable").style.display      = "block";
-      document.getElementById("lastMonthsTableCosts").style.display = "none";
+    var nGraphVersion = 0;
+    switch(pType)
+    {
+      case "GRAPH_STATIC":
+        nGraphVersion +=1;  //fall through!
+      case "GRAPH":
+        nGraphVersion +=1;
+        console.log("Set presentationType to GRAPHICS mode!");
+        presentationType = pType;
+        setGraphVersion(nGraphVersion);
 
-    } else if (pType == "TAB") {
-      console.log("Set presentationType to Tabular mode!");
-      presentationType = pType;
-      document.getElementById('aTAB').checked   = true;
-      document.getElementById('aGRAPH').checked = false;
-      document.getElementById('hTAB').checked   = true;
-      document.getElementById('hGRAPH').checked = false;
-      document.getElementById('dTAB').checked   = true;
-      document.getElementById('dGRAPH').checked = false;
-      document.getElementById('mTAB').checked   = true;
-      document.getElementById('mGRAPH').checked = false;
-      document.getElementById('mCOST').checked  = false;
+        //???
+        initActualGraph();
 
-    } else {
-      console.log("setPresentationType to ["+pType+"] is quite shitty! Set to TAB");
-      presentationType = "TAB";
+        //set all other radiogroups to GRAPH
+        //This relies on the groupname to be the same
+        //document.getElementById('aGRAPH').checked = true;
+        //document.getElementById('hGRAPH').checked = true;
+        //document.getElementById('dGRAPH').checked = true;
+        //document.getElementById('mGRAPH').checked = true;
+        
+        /*        
+        document.getElementById('aTAB').checked   = false;        
+        document.getElementById('hTAB').checked   = false;        
+        document.getElementById('dTAB').checked   = false;        
+        document.getElementById('mTAB').checked   = false;
+        document.getElementById('mCOST').checked  = false;
+        document.getElementById("lastMonthsTable").style.display      = "block";
+        document.getElementById("lastMonthsTableCosts").style.display = "none";
+        */
+        break;
+
+      case "TAB":        
+        console.log("Set presentationType to Tabular mode!");
+        presentationType = pType;
+
+        //select all TABs
+        //this relies on all radiobuttons in a group shares the same name
+        //document.getElementById('aTAB').checked   = true;
+        //document.getElementById('hTAB').checked   = true;
+        //document.getElementById('dTAB').checked   = true;
+        //document.getElementById('mTAB').checked   = true;
+
+        //reset cost checkbox
+        //document.getElementById('mCOST').checked  = false;
+
+        /*
+        document.getElementById('aGRAPH').checked = false;
+        document.getElementById('hGRAPH').checked = false;
+        document.getElementById('dGRAPH').checked = false;
+        document.getElementById('mGRAPH').checked = false;
+        document.getElementById('mCOST').checked  = false;
+        */
+        break;
+      
+      default:
+        console.log("setPresentationType to ["+pType+"] is quite shitty! Set to TAB");
+        presentationType = "TAB";
     }
 
 //    document.getElementById("APIdocTab").style.display = "none";
@@ -2066,7 +2093,7 @@ function parseSmFields(data)
     if (activeTab == "bMonthsTab")  refreshMonths();
 
   } // setPresenationType()
-  
+
     
   //============================================================================  
   function setMonthTableType() {
