@@ -17,12 +17,15 @@ const listChartTypes = [
   {type:"STATIC_NORMAL", name:"Normaal Vast"}
 ];
 
-let TimerActual;
-let actPoint        = 0;
-let maxPoints       = 100;
-var actLabel        = "-";
-var gasDelivered    = 0;
-var fGraphsReady = false;
+//let TimerActual;
+//let actPoint        = 0;
+//let maxPoints       = 100;
+//var actLabel        = "-";
+//var gasDelivered    = 0;
+var fGraphsReady    = false;
+var listTELEGRAMS   = [];
+//var sGraphMode = "REVERSED_SLIDING";
+var sGraphMode = "NORMAL_STATIC";
 
 var electrData = createChartDataContainer();
 var actElectrData = createChartDataContainer();
@@ -131,92 +134,45 @@ function ensureChartsReady()
   if( !fGraphsReady) createChartsGRAPH();
 }
 
-  //============================================================================  
-  /*
-  function renderElectrChart(dataSet, options) {
-    //console.log("Now in renderElectrChart() ..");
-    
-    if (myElectrChart) {
-      myElectrChart.destroy();
-    }
+//function to set new type of graphs
+function setGraphVersion(nVersion)
+{
+  if( nVersion==1) sGraphMode = "REVERSED_SLIDING";
+  if( nVersion==2) sGraphMode = "NORMAL_STATIC";
+}
 
-    var ctxElectr = document.getElementById("dataChart").getContext("2d");
-    myElectrChart = new Chart(ctxElectr, {
-      type: 'bar',
-      data: dataSet,
-      options: options,
-    });
-    
-  } // renderElectrChart()
-
-  //============================================================================  
-  function renderWaterChart(dataSet) {
-    //console.log("Now in renderGasChart() ..");
-    
-    if (myWaterChart) {
-      myWaterChart.destroy();
-    }
-
-    var ctxWater = document.getElementById("waterChart").getContext("2d");
-    myWaterChart = new Chart(ctxWater, {
-      type: 'line',
-      data: dataSet,
-      options: optionsWATER
-    });
-    
-  } // renderWaterChart()
-  
-  //============================================================================  
-  function renderGasChart(dataSet) {
-    //console.log("Now in renderGasChart() ..");
-    
-    if (myGasChart) {
-      myGasChart.destroy();
-    }
-
-    var ctxGas = document.getElementById("gasChart").getContext("2d");
-    myGasChart = new Chart(ctxGas, {
-      type: 'line',
-      data: dataSet,
-      options: optionsGAS
-    });
-    
-  } // renderGasChart()
-  */
-
-  //voor gebruik in dropdown menu
-  function getChartTypes()
+//ENTRY point from DSMRindex.js for HOURS, DAYS and MONTHS
+function showHistGraph(data, type)
+{
+  switch(sGraphMode)
   {
-    return listChartTypes;
-  }
+    case "REVERSED_SLIDING":
+      switch(type)
+      {
+        case "Hours":   //fall through
+        case "Days":    showGraphHistory(data, type); break;
+        case "Months":  showGraphMonths(data, type); break;
+      }
+      break;
 
-  function showGraph( type, period, data)
-  {
-    switch(type)
-    {
-      case "REVERSED_SLIDING": 
-        if (period == "Hours") showGraphREVERSED_HOURS(data);
-        else showGraphREVERSED_DAYS(data);
-        break;
+    case "NORMAL_STATIC":
+      switch(type)
+      {
+        case "Hours":   showGraphSTATIC_HOURS(data); break;
+        case "Days":    showGraphSTATIC_DAYS(data); break;
+        case "Months":  showGraphSTATIC_MONTHS(data); break;
+      }        
+      break;
+  }
+  return true;
+}
 
-      case "NORMAL_STATIC": 
-        if (period == "Hours")  showGraphSTATIC_HOURS(data);
-        else                    showGraphSTATIC_DAYS(data);
-        break;
-    }
-  }
-  
-  //Two redirect functions
-  function showGraphREVERSED_DAYS(data)
-  {
-    showHistGraph(data, "Days");
-  }
-  function showGraphREVERSED_HOURS(data)
-  {
-    showHistGraph(data, "Hours");
-  }
-  //============================================================================  
-  function showHistGraph(data, type)
+/*
+//============================================================================
+*/
+
+  //show Graph for HOURS and DAYS (original)
+  function showGraphHistory(data, type)
   {
     ensureChartsReady();
 
@@ -256,8 +212,8 @@ function ensureChartsReady()
 
   } // showHistGraph()
     
-  //============================================================================  
-  function showMonthsGraph(data, type)
+  //show graph for MONTHS (original)
+  function showGraphMonths(data, type)
   {
     ensureChartsReady();
     
@@ -292,8 +248,7 @@ function ensureChartsReady()
     document.getElementById('mCOST').checked   = false;
 
   } // showMonthsGraph()
-  
-  
+    
   //============================================================================  
   function copyDataToChart(data, type)
   {
@@ -359,8 +314,7 @@ function ensureChartsReady()
     waterData.datasets.push(dsW1);
 
   } // copyDataToChart()
-  
-  
+    
   //============================================================================  
   function copyMonthsToChart(data)
   {
@@ -493,13 +447,11 @@ function ensureChartsReady()
     listTELEGRAMS.push(objTelegram);
   }
  
-  //============================================================================  
+  //not really needed anymore; replaced by createChartsGRAPH.
+  //So this will act as a legacy wrapper
   function initActualGraph()
   {
-    //reset pos
-    actPoint = 0;
-    if(!fGraphsReady) createChartsGRAPH();
-  
+    if(!fGraphsReady) createChartsGRAPH();  
   } // initActualGraph()
 
   //============================================================================  
@@ -531,8 +483,7 @@ function ensureChartsReady()
     //TODO
 
   } // showActualGraph()
-  
-  
+    
   //============================================================================  
   function formatGraphDate(type, dateIn) 
   {
@@ -748,6 +699,13 @@ EXPERIMENTEEL
     myElectrChart.data = dcEX;
     myGasChart.data = dcGX;
     myWaterChart.data = dcWX;
+
+    //set label Yaxes    
+    myElectrChart.options.scales.yAxes[0].scaleLabel.labelString = "Watt/uur";
+    var labelString = "dm3";
+    if ( Dongle_Config == "p1-q") labelString = "kJ";
+    myGasChart.options.scales.yAxes[0].scaleLabel.labelString = labelString;
+    myWaterChart.options.scales.yAxes[0].scaleLabel.labelString = "dm3";
     
     //update chart
     myElectrChart.update();
@@ -774,6 +732,13 @@ EXPERIMENTEEL
     myElectrChart.data = dcEX;
     myGasChart.data = dcGX;
     myWaterChart.data = dcWX;
+
+    //update label Yaxe
+    myElectrChart.options.scales.yAxes[0].scaleLabel.labelString = "kWh";
+    var labelString = "m3";
+    if ( Dongle_Config == "p1-q") labelString = "kJ";
+    myGasChart.options.scales.yAxes[0].scaleLabel.labelString = labelString;
+    myWaterChart.options.scales.yAxes[0].scaleLabel.labelString = "m3";
     
     //update chart
     myElectrChart.update();
@@ -799,6 +764,13 @@ EXPERIMENTEEL
     myElectrChart.data = dcEX;
     myGasChart.data = dcGX;
     myWaterChart.data = dcWX;
+
+    //update label Yaxe
+    myElectrChart.options.scales.yAxes[0].scaleLabel.labelString = "kWh";
+    var labelString = "m3";
+    if ( Dongle_Config == "p1-q") labelString = "kJ";
+    myGasChart.options.scales.yAxes[0].scaleLabel.labelString = labelString;
+    myWaterChart.options.scales.yAxes[0].scaleLabel.labelString = "m3";
     
     //update chart
     myElectrChart.update();
@@ -834,6 +806,10 @@ EXPERIMENTEEL
   function createDatasetsForChartSpecial(hcDX, hcRX, listLABELS_X, listDATASETS)
   {    
     var dcDX = createChartDataContainer();
+    var nLEN = hcDX.current.length;
+    var nDEPTH = 3;
+    //TODO for the weeks if days=31
+    //TODO check depth and length labels
 
     //create a alphablend for one color
     var listCOLORS1 = createAlphaList( "255,0,0", listDATASETS.length, 2 );
@@ -844,18 +820,28 @@ EXPERIMENTEEL
     const [dsER1, dsER2, dsER3] = createHistoryDatasetsBAR( listCOLORS2, listDATASETS);
 
     //TODO NETTO datasets????
-
+    
     //fill datasets with historycontainers
-    //TODO
+    for(var i=0; i<nLEN; i++)
+    {
+      dsED1.data[i]  = hcDX.current[i];
+      dsED2.data[i]  = hcDX.previous[i];
+      dsED3.data[i]  = hcDX.preprevious[i];
+      dsER1.data[i]  = hcRX.current[i];
+      dsER2.data[i]  = hcRX.previous[i];
+      dsER3.data[i]  = hcRX.preprevious[i];
+    }    
     
     //add to chartcontainer
     dcDX.labels = listLABELS_X;
     dcDX.datasets.push(dsED1);
     dcDX.datasets.push(dsED2);
     dcDX.datasets.push(dsED3);
-    dcDX.datasets.push(dsER1);
-    dcDX.datasets.push(dsER2);
-    dcDX.datasets.push(dsER3);
+    if( Injection ){
+      dcDX.datasets.push(dsER1);
+      dcDX.datasets.push(dsER2);
+      dcDX.datasets.push(dsER3);
+    }
     return dcDX;
   }
 
@@ -863,9 +849,13 @@ EXPERIMENTEEL
   function createDatasetsForChart( hcDX, listLABELS_X, listDATASETS )
   {
     var dcDX = createChartDataContainer();
+    var nLEN = hcDX.current.length;
+    var nDEPTH = 3;
+    //TODO for the weeks if days=31
+    //TODO check depth and length labels
     
-    //create a alphablend for color RED
-    var listCOLORS1 = createAlphaList( "255,0,0", listDATASETS.length, 2 );
+    //create a alphablend for color BLUE
+    var listCOLORS1 = createAlphaList( "0,0,255", listDATASETS.length, 2 );
     //or create your own list
     //var listCOLORS1 = ["rgba(255,0,0,1)", "rgba(0,255,0,1)", "rgba(0,0,255,1)"];
     
@@ -873,7 +863,12 @@ EXPERIMENTEEL
     const [dsXD1, dsXD2, dsXD3] = createHistoryDatasetsLINE( listCOLORS1, listDATASETS);
 
     //fill data
-    //TODO
+    for(var i=0; i<nLEN; i++)
+    {
+      dsXD1.data.push( hcDX.current[i]);      
+      dsXD2.data.push( hcDX.previous[i]);
+      dsXD3.data.push( hcDX.preprevious[i]);
+    }
     
     //add to chartcontainer
     dcDX.labels = listLABELS_X;
@@ -886,7 +881,7 @@ EXPERIMENTEEL
   }
 
   //create 3 datasets in one go
-  function createHistoryDatasetsBAR(rgb, listColors, listLabels)
+  function createHistoryDatasetsBAR(listColors, listLabels)
   {
     var dsX1 = createDatasetBAR(false, listColors[0], listLabels[0], 'STACK_A');
     var dsX2 = createDatasetBAR(false, listColors[1], listLabels[1], 'STACK_B');
@@ -895,7 +890,7 @@ EXPERIMENTEEL
   }
 
    //create 3 datasets LINE in one go
-   function createHistoryDatasetsLINE(rgb, listColors, listLabels)
+   function createHistoryDatasetsLINE(listColors, listLabels)
    {
      var dsX1 = createDatasetLINE(false, listColors[0], listLabels[0]);
      var dsX2 = createDatasetLINE(false, listColors[1], listLabels[1]);
@@ -935,7 +930,13 @@ EXPERIMENTEEL
   //divide the data into 3 day-arrays (each 24 days; start=00)
   function prepareDataForHistoryContainerHOURS(data)
   {
-    var listLABELS = ["vandaag","gisteren","eergisteren"];
+    //var listLABELS = ["vandaag","gisteren","eergisteren"];
+    var objTODAY = new Date();
+    var nDD0 = objTODAY.getDate();
+    var nMM0 = objTODAY.getMonth();
+    //var nDDp = objTODAY.getDate()-1;
+    //var nDDpp = objTODAY.getDate()-2;
+    //TODO: determine yesterday correctly
 
     //create history container
     var hcED = createHistoryContainer(24,3);
@@ -944,7 +945,6 @@ EXPERIMENTEEL
     var hcWD = createHistoryContainer(24,3);
 
     //fill container with data
-    var nSlot = data.actSlot;
     for(var i=0; i<data.data.length; i++)
     {
       var item = data.data[i];
@@ -960,12 +960,32 @@ EXPERIMENTEEL
       var nGD = item.p_gd;      
       var nWD = item.p_wd;
 
-      //store values
-      hcED.current[nHH] = nED;
-      hcER.current[nHH] = nER;
-      hcGD.current[nHH] = nGD;
-      hcWD.current[nHH] = nWD;
+      //skip the corrupt slot
+      if( i != (data.actSlot+1))
+      {
+        //store values
+        if( nDD == nDD0 ){
+          hcED.current[nHH] = nED;
+          hcER.current[nHH] = nER;
+          hcGD.current[nHH] = nGD;
+          hcWD.current[nHH] = nWD;
+        }
+        if( nDD == (nDD0-1) ){
+          hcED.previous[nHH] = nED;
+          hcER.previous[nHH] = nER;
+          hcGD.previous[nHH] = nGD;
+          hcWD.previous[nHH] = nWD;
+        }
+        if( nDD == (nDD0-2)){
+          hcED.preprevious[nHH] = nED;
+          hcER.preprevious[nHH] = nER;
+          hcGD.preprevious[nHH] = nGD;
+          hcWD.preprevious[nHH] = nWD;
+        }
+      }
     }
+
+    return [hcED, hcER, hcGD, hcWD];
   }
 
   //divide the data into 3 week-arrays (each 7 days; start=monday)
@@ -983,27 +1003,156 @@ EXPERIMENTEEL
     var nDays = data.data.length;
     //with 14 days you need 3 weeks, with 31 days you need 5 weeks
     var nWeeks = Math.ceil( (nDays+1)/7 );
+    var objTODAY = new Date();
+    var nThisWeek = getWeeknumber(objTODAY);
 
     var listLABELS = ["deze week","vorige week","twee weken geleden"];
+    //TODO: what if days=31; dire weken en vier weken geleden?
     //TODO: weeknummers?
 
     var dcED = createHistoryContainer(7, nWeeks);
+    var dcER = createHistoryContainer(7, nWeeks);
+    var dcGD = createHistoryContainer(7, nWeeks);
+    var dcWD = createHistoryContainer(7, nWeeks);
 
     //fill container
-    //TODO
+    for(var i=0; i<data.data.length; i++)
+    {
+      var item = data.data[i];
+      var date = item.date;
+      var nYY = parseInt( date.substring(0,2) );
+      var nMM = parseInt( date.substring(2,4) );
+      var nDD = parseInt( date.substring(4,6) );
+      var nHH = parseInt( date.substring(6,8) );
+      var objDate = new Date(nYY+2000, nMM-1, nDD);
+      //returns 0=sunday,etc but we need 0=monday, etc
+      var nDOW = (objDate.getDay()+6) % 7;
+      var nWeek = getWeeknumber(objDate);
+
+      if( i == data.actSlot+1) continue;
+
+      //get values
+      var nED = item.p_ed;
+      var nER = item.p_er;
+      var nGD = item.p_gd;
+      var nWD = item.p_wd;
+
+      //0=monday, 1=tuesday, etc
+      //this week
+      if( nWeek == nThisWeek){
+        dcED.current[nDOW] = nED;
+        dcER.current[nDOW] = nER;
+        dcGD.current[nDOW] = nGD;
+        dcWD.current[nDOW] = nWD;
+      }
+      
+      //prev week
+      if( nWeek == nThisWeek-1){
+        dcED.previous[nDOW] = nED;
+        dcER.previous[nDOW] = nER;
+        dcGD.previous[nDOW] = nGD;
+        dcWD.previous[nDOW] = nWD;
+      }
+
+      //prev prev week
+      if( nWeek == nThisWeek-2){
+        dcED.preprevious[nDOW] = nED;
+        dcER.preprevious[nDOW] = nER;
+        dcGD.preprevious[nDOW] = nGD;
+        dcWD.preprevious[nDOW] = nWD;
+      }
+    }
+
+    return [dcED, dcER, dcGD, dcWD];
   }
 
   //divide the data into 3 year-arrays (each 12 months; start=jan) 
   function prepareDataForHistoryContainerMONTHS(data)
   {
     var listLABELS = ["dit jaar","vorig jaar","twee jaar geleden"];
+    var objTODAY = new Date();
+    var nYY_current = objTODAY.getFullYear() - 2000;
     
     var dcED = createHistoryContainer(12,3);
+    var dcER = createHistoryContainer(12,3);
+    var dcGD = createHistoryContainer(12,3);
+    var dcWD = createHistoryContainer(12,3);
 
-    //fill container
-    //TODO
+    //fill container     
+    for(var i=0; i<data.data.length; i++)
+    {
+      var item = data.data[i];
+      var date = item.date;
+      var nYY = parseInt( date.substring(0,2) );
+      var nMM = parseInt( date.substring(2,4) )-1;
+      var nDD = parseInt( date.substring(4,6) );
+      //var nHH = parseInt( date.substring(6,8) );
+      //var objDate = new Date(nYY+2000, nMM-1, nDD);
+      //var nWD = objDate.getDay();
+
+      //get values
+      var nED = item.p_ed;
+      var nER = item.p_er;
+      var nGD = item.p_gd;      
+      var nWD = item.p_wd;
+
+      //skip corrupt slot
+      if( i == (data.actSlot+1)) continue;
+      
+      //store in correct container
+      if( nYY == nYY_current){
+        dcED.current[nMM] = nED;
+        dcER.current[nMM] = nER;
+        dcGD.current[nMM] = nGD;
+        dcWD.current[nMM] = nWD;
+      }
+
+      if( nYY == nYY_current-1){
+        dcED.previous[nMM] = nED;
+        dcER.previous[nMM] = nER;
+        dcGD.previous[nMM] = nGD;
+        dcWD.previous[nMM] = nWD;
+      }
+
+      if( nYY == nYY_current-2){
+        dcED.preprevious[nMM] = nED;
+        dcER.preprevious[nMM] = nER;
+        dcGD.preprevious[nMM] = nGD;
+        dcWD.preprevious[nMM] = nWD;
+      }
+    }
+
+    //return all containers
+    return [dcED, dcER, dcGD, dcWD];
   }  
 
+/*
+//==============================UTILS=========================================
+*/
+
+//helper function to set all values to a value in an array
+function fillArray(array, value) {
+	for (var idx = 0; idx < array.length; idx++) {
+		array[idx] = value;
+	}
+}
+
+function fillArrayNULL(array) {
+	fillArray(array, null);
+}
+
+// Returns the ISO week of the date.  
+function getWeeknumber(dateIN)
+{ 
+  // Thursday in current week decides the year. 
+  var date = new Date(dateIN.getTime());
+  date.setHours(0, 0, 0, 0);  
+  date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+  // January 4 is always in week 1.
+  var week1 = new Date(date.getFullYear(), 0, 4);
+  // Adjust to Thursday in week 1 and count number of weeks from date to week1.
+  return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+}
 
 
 
