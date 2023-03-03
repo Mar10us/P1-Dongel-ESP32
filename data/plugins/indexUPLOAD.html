@@ -28,20 +28,26 @@
 
         <div hidden id="loader"></div>
 
-        <section id="FileExplorer" class="tabName"><h2>Bestandsbeheer</h2>
-            <div>
+        <section id="FileExplorer" class="tabName">
+            <h2>Bestandsbeheer</h2>
+
+            <div class="filelist">
+                <h3>Bestanden op de Dongle</h3>
                 <main id="FSmain"></main>
             </div>
-            
-            <form action="/upload" method="POST" enctype="multipart/form-data">
-                <input id="Ifile" type="file" name="upload" multiple>
-                <input id="Iupload" type="submit" value="Upload" disabled/>
-            </form>
 
-            <div>Device will reboot after uploading</div>
-    
-            <span></span>
-            <fileSize></fileSize>
+            <div class="upload">
+                <h3>Bestanden voor upload</h3>
+                <div id="uploadlist" class="list"></div>
+
+                <form action="/upload" method="POST" enctype="multipart/form-data">
+                    <input id="Ifile" type="file" name="upload" multiple>
+                    <input id="Iupload" type="submit" value="Upload" disabled/>
+                </form>
+
+                <div class="footer">Device will reboot after uploading</div>
+            </div>
+            
         </section>
 
     </div>
