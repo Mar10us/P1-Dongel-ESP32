@@ -25,6 +25,10 @@ body {
 	padding: 0;
 }
 
+th{
+  text-align: left;
+}
+
 section {
   margin: auto;
   width: fit-content;
@@ -33,6 +37,28 @@ section {
 
 .filelist{
   background-color: #cccccc;
+  display: block;
+}
+.file{
+  width: 100%;
+  margin:5px;
+  padding:5px;
+  display: flex;
+}
+.filename{
+  width: 400px;
+}
+.filetype{
+  font-size: small;
+  width: 100px;
+}
+.filesize{
+  font-size: small;
+  width: 100px;
+}
+.action{
+  width: 100px;
+  cursor:pointer;
 }
 .upload{
   background-color: #cccccc;
