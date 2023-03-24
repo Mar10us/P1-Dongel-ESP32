@@ -4,6 +4,7 @@
 
 const APIGW = window.location.protocol + '//' + window.location.host + '/api/';
 const URL_LOCAL_LISTFILES = "api/listfiles";
+const MAX_FILES = 30;
 const btn_download = `<iconify-icon icon="mdi:file-download-outline" height="24"></iconify-icon>`;
 const btn_delete = `<iconify-icon icon="mdi:file-document-remove-outline" height="24"></iconify-icon>`;
 
@@ -157,6 +158,25 @@ function showFileList(json)
   //store freebytes
   nFreeSize = json[i].freeBytes;
   //document.querySelector('fileSize').innerHTML = "<b> &nbsp; </b><p>";
+
+  //store used/total space
+  let sUB = json[i].usedBytes;
+  sUB = sUB.replace(" MB", "");
+  sUB = sUB.replace(" KB", "");  
+  let nTotalSizeBYTES = 1.44 * 1024 * 1024;
+  let nUsedSizeBYTES = Number(sUB) * 1024;
+  let used_precentage = 100 * (nUsedSizeBYTES/nTotalSizeBYTES);
+  document.getElementById('used1').setAttribute("style","width:"+used_precentage.toFixed(0)+"%");
+  document.getElementById('used1').innerHTML = json[i].usedBytes;
+  document.getElementById('free1').innerHTML = json[i].totalBytes;
+
+  //store used files
+  let nFilecount = json.length;
+  let nTotalFiles= MAX_FILES;
+  let usedfile_percentage = 100 * (nFilecount / nTotalFiles);
+  document.getElementById('used2').setAttribute("style","width:"+usedfile_percentage.toFixed(0)+"%");
+  document.getElementById('used2').innerHTML = nFilecount;
+  document.getElementById('free2').innerHTML = nTotalFiles;
 }
 
 /*

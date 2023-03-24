@@ -37,6 +37,18 @@
             <div class="filelist">
                 <h3>Bestanden op de Dongle</h3>
                 <main id="FSmain"></main>
+                <div class="filestats">
+                    <div class="filecount">
+                        <div class="usedfiles" id="used2">Used</div>
+                        <div class="freefiles" id="free2">Free</div>
+                    </div>
+                    <div class="filespace">
+                        <div class="totalspace">
+                            <div class="usedspace" id="used1">Used</div>
+                            <div class="freespace" id="free1">Free</div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="upload">
@@ -45,12 +57,12 @@
 
                 <form action="/upload" method="POST" enctype="multipart/form-data">
                     <input id="Ifile" type="file" name="upload" multiple>
+                    <br>
                     <input id="Iupload" type="submit" value="Upload" disabled/>
                 </form>
 
                 <div class="footer">Device will reboot after uploading</div>
-            </div>
-            
+            </div>            
         </section>
 
     </div>
