@@ -6,52 +6,25 @@
 const APIGW=window.location.protocol+'//'+window.location.host+'/api/';
 const URL_HISTORY_DAYS = APIGW + "../RNGdays.json";
 const URL_HISTORY_MONTHS = APIGW + "../RNGmonths.json";
+const URL_SM_ACTUAL = APIGW + "v2/sm/actual";
+
 let timerRefresh = 0;
 let sCurrentChart = "MONTHS";
 
 testMeterstanden = [
 	
-	{date:"2022-02-05", values:[7059, 6163, 0, 0, 5683, 0]},
-	//{date:"2022-02-05", values:[6163, 7059, 0, 0, 5683, 0]},
+	//{date:"2022-02-05", values:[7059, 6163, 0, 0, 5683, 0]},
+	/*{date:"2022-02-05", values:[6163, 7059, 0, 0, 5683, 0]},
 	{date:"2021-02-13", values:[5174, 4411, 0, 0, 4375, 0]},
 	{date:"2020-02-12", values:[3483, 3018, 0, 0, 2779, 0]},
 	{date:"2019-01-27", values:[1717, 1510, 0, 0, 1588, 0]},
-	{date:"2018-02-13", values:[149,   169, 0, 0,  284, 0]}
+	{date:"2018-02-13", values:[149,   169, 0, 0,  284, 0]}*/
 ];
 testMeterstanden.reverse();
 
-testHuidigeMeterstand = {date:"2023-02-13", values:[8861, 7733, 900, 1900, 6781, 900]};
+//testHuidigeMeterstand = {date:"2023-02-13", values:[8861, 7733, 900, 1900, 6781, 900]};
+let currentReading = {date:"2000-00-00", values:[0, 0, 0, 0, 0, 0]};
 var listMONTHS = [];
-
-// testRNGmonths.json
-testRNGmonths = {"actSlot":16,"data":[
-{"date":"21100101","values":[  5987.000,  6198.000,     0.000,     0.000,  5170.000,     0.000]},
-{"date":"21110101","values":[  6074.000,  6418.000,     0.000,     0.000,  5234.000,     0.000]},
-{"date":"21120101","values":[  6163.000,  6712.000,     0.000,     0.000,  5343.000,     0.000]},
-{"date":"22010101","values":[  6535.000,  7059.000,     0.000,     0.000,  5496.000,     0.000]},
-{"date":"22020101","values":[  6887.000,  7093.000,     0.000,     0.000,  5683.000,     0.000]},
-{"date":"22030101","values":[  7186.000,  7131.000,     0.000,     0.000,  5837.000,     0.000]},
-{"date":"22040101","values":[  7409.000,  7176.000,     0.000,     0.000,  5982.000,     0.000]},
-{"date":"22050101","values":[  7559.000,  7230.000,     0.000,     0.000,  6104.004,     0.000]},
-{"date":"22060101","values":[  7653.000,  7295.000,     0.000,     0.000,  6191.000,     0.000]},
-{"date":"22070101","values":[  7728.000,  7368.000,     0.000,     0.000,  6245.000,     0.000]},
-{"date":"22080101","values":[  7823.000,  7443.000,     0.000,     0.000,  6274.000,     0.000]},
-{"date":"22090101","values":[  7972.000,  7516.000,     0.000,     0.000,  6294.000,     0.000]},
-{"date":"22100101","values":[  8196.000,  7581.000,     0.000,     0.000,  6324.000,     0.000]},
-{"date":"22110101","values":[  8494.000,  7635.000,     0.000,     0.000,  6377.000,     0.000]},
-{"date":"22120101","values":[  8650.000,  7680.000,     0.000,     0.000,  6465.000,     0.000]},
-{"date":"23013123","values":[  8833.276,  7709.986,     0.049,     0.000,  6700.638,     0.000]},
-{"date":"23021214","values":[  8858.382,  7733.284,     0.049,     0.000,  6776.655,     0.000]},
-{"date":"21020101","values":[  5352.000,  5124.000,     0.000,     0.000,  4373.000,     0.000]},
-{"date":"21030101","values":[  5438.000,  5417.000,     0.000,     0.000,  4573.000,     0.000]},
-{"date":"21040101","values":[  5521.000,  5417.000,     0.000,     0.000,  4759.000,     0.000]},
-{"date":"21050101","values":[  5599.000,  5638.000,     0.000,     0.000,  4913.000,     0.000]},
-{"date":"21060101","values":[  5675.000,  5785.000,     0.000,     0.000,  5022.000,     0.000]},
-{"date":"21070101","values":[  5751.000,  5880.000,     0.000,     0.000,  5087.000,     0.000]},
-{"date":"21080101","values":[  5826.000,  5956.000,     0.000,     0.000,  5118.000,     0.000]},
-{"date":"21090101","values":[  5905.000,  6050.000,     0.000,     0.000,  5138.000,     0.000]}
-]};
-
 
 const listValuesCeilingE = [339, 280, 267, 207, 181, 159, 161, 176, 199, 266, 306, 356];
 const listValuesCeilingG = [221, 188, 159,  86,  35,  19,  17,  17,  24,  81, 146, 207];
@@ -181,7 +154,8 @@ function fnBootstrap()
 	createCharts();
 
 	//set handlers
-	document.getElementById("addrow").addEventListener("click", onButtonAdd);
+	document.getElementById("addrow1").addEventListener("click", onButtonAdd);
+	document.getElementById("addrow2").addEventListener("click", onButtonAddActual);
 	//document.getElementById("delete").addEventListener("click", onButtonDelete);
 	document.getElementById("analyse-plot").addEventListener("click", onButtonAnalysePlot);
 	document.getElementById("analyse-lin").addEventListener("click", onButtonAnalyseLinear);
@@ -189,13 +163,15 @@ function fnBootstrap()
 	document.getElementById("export-download").addEventListener("click", onButtonExportSave);
 	document.getElementById("export-store").addEventListener("click", onButtonExportStore);
 
+	resetFormFields();
+
 	//update table with internal json
 	updateTable(testMeterstanden);
-		
+	
 	//refresh and schedule every 60sec
-	//refreshData();
-	//clearInterval(timerRefresh);
-    //timerRefresh = setInterval(refreshData, 60 * 1000); // repeat every 60s
+	refreshData();
+	clearInterval(timerRefresh);
+    timerRefresh = setInterval(refreshData, 60 * 1000); // repeat every 60s
 }
 
 //display internal json to table
@@ -207,6 +183,7 @@ function updateTable(data)
 		var item = data[i];
 		var date = item.date;
 		var [ED1, ED2, ER1, ER2, GD, WD] = item.values;
+		var icon = `<iconify-icon icon="mdi:receipt-text-remove" height="24"></iconify-icon>`;
 
 		var rowheader = "<tr Id='" + date + "' data-date='" + date + 
 		"' data-ed1='" + ED1 + "' data-ed2='" + ED2 + 
@@ -216,19 +193,44 @@ function updateTable(data)
 		//var rowaction = "<button id='" + btneditId + "' class='btn btn-info btn-xs btn-editcustomer' onclick='showeditrow(" + EmployeeID + ")'><i class='fa fa-pencil' aria-hidden='true'></i>Edit</button>";
 		//rowaction+= "<button id='" + btndeleteId + "' class='btn btn-danger btn-xs btn-deleteEmployee' onclick='deleteEmployeeRow(" + EmployeeID + ")'><i class='fa fa-trash' aria-hidden='true'>Delete</button>"
 		var rowdata = 
-			"<td class='td-data'>" + date + "</td>"
+		  "<td class='td-data'>" + date + "</td>"
 		+ "<td class='td-data'>" + ED1 + "</td>"
 		+ "<td class='td-data'>" + ED2 + "</td>"
 		+ "<td class='td-data'>" + ER1 + "</td>"
 		+ "<td class='td-data'>" + ER2 + "</td>"
 		+ "<td class='td-data'>" + GD + "</td>"
 		+ "<td class='td-data'>" + WD + "</td>"
-		+ "<td class='td-data'>" + "[btnDelete]" + "</td>"
+		+ "<td class='td-data'>" 
+		+ `<div class='action' id='action${i}' onclick='onButtonRemove(this)'>${icon}</div>`
+		+ "</td>";
 		+ "</tr>";
 		var tablerow = rowheader + rowdata;
 		tablerows += tablerow;
 	}
 	document.getElementById('TABLE_METERSTANDEN').innerHTML = tablerows;
+}
+
+function onButtonRemove(element)
+{
+	//console.log(element);
+	var idx = Number(element.id.split("action")[1]);
+	removeReading(idx);
+}
+
+function removeReading(idx)
+{
+	console.log("removeReading() - idx=" + idx);
+  	
+	//rebuild a filelist but skip the item to remove
+	var new_readings = [];
+	for (let i = 0; i < testMeterstanden.length; i++) {
+		if (idx !== i) new_readings.push( testMeterstanden[i] );
+	}
+
+	// Assign buffer to file input	
+	testMeterstanden = new_readings;
+
+	updateTable(testMeterstanden);
 }
 
 function onButtonAdd(event)
@@ -239,18 +241,21 @@ function onButtonAdd(event)
 
 	//var get all from values	
 	var date = document.getElementById("date").value;
-	var ED1 = document.getElementById("ED_TARIF1").value;
-	var ED2 = document.getElementById("ED_TARIF2").value;
-	var ER1 = document.getElementById("ER_TARIF1").value;
-	var ER2 = document.getElementById("ER_TARIF2").value;
-	var GD = document.getElementById("GD").value;
-	var WD = document.getElementById("WD").value;
+	var ED1 = Number(document.getElementById("ED_TARIF1").value);
+	var ED2 = Number(document.getElementById("ED_TARIF2").value);
+	var ER1 = Number(document.getElementById("ER_TARIF1").value);
+	var ER2 = Number(document.getElementById("ER_TARIF2").value);
+	var GD  = Number(document.getElementById("GD").value);
+	var WD  = Number(document.getElementById("WD").value);
 
 	//validate date and standen
 	var fValid = false;
+	
+	//verify meterstanden 
 	//TODO
+	fValid = true;
 
-	//if( fValid )
+	if( fValid )
 	{
 		//create row
 		var row = {date: date.toString(), values: [ED1,ED2, ER1, ER2, GD, WD]};
@@ -267,14 +272,34 @@ function onButtonAdd(event)
 
 		//update table
 		updateTable(testMeterstanden);
-	}
-
-	if( fValid )
-	{
+	
 		resetFormFields();
 	}
 
 	Spinner(false);
+}
+
+function onButtonAddActual(event)
+{
+	event.preventDefault();
+
+	Spinner(true);
+
+	var currentReading = getCurrentReading();
+	setFormFields(currentReading);
+
+	Spinner(false);
+}
+
+function setFormFields(item)
+{
+	document.getElementById("date").value = item.date;
+	document.getElementById("ED_TARIF1").value = item.values[0];
+	document.getElementById("ED_TARIF2").value = item.values[1];
+	document.getElementById("ER_TARIF1").value = item.values[2];
+	document.getElementById("ER_TARIF2").value = item.values[3];
+	document.getElementById("GD").value = item.values[4];
+	document.getElementById("WD").value = item.values[5];
 }
 
 function resetFormFields()
@@ -288,10 +313,53 @@ function resetFormFields()
 	document.getElementById("WD").value = "";
 }
 
+function refreshData()
+{	
+	fetchDataJSON(URL_SM_ACTUAL, parseActualData);
+}
+
 function getCurrentReading()
 {
-	//TODO: get real reading
-	return testHuidigeMeterstand;
+	console.log("getCurrentReading() - ", currentReading);
+	return currentReading;
+}
+
+function fetchDataJSON(url, fnHandleData) 
+{
+	console.log("fetchDataJSON( "+url+" )");
+
+	fetch(url)
+	.then(response => response.json())
+	.then(json => { fnHandleData(json); })
+	.catch(function (error) {
+	  console.error("fetchDataJSON() - " + error.message);
+	  var p = document.createElement('p');
+	  p.appendChild( document.createTextNode('Error: ' + error.message) );
+	});
+}
+
+function parseActualData(data)
+{
+	//parse date and store in currentReading
+	for (var item in data) 
+    {
+		switch(item)
+		{
+			case "timestamp":
+				//230421093210S
+				let sdate = data[item].value.substring(0,6);
+				let tdate = "20"+ sdate.substring(0,2) + "-" + sdate.substring(2,4) + "-" + sdate.substring(4,6);
+				currentReading.date = tdate;
+				break;
+						
+			case 'energy_delivered_tariff1': currentReading.values[0] = data[item].value; break;
+			case 'energy_delivered_tariff2': currentReading.values[1] = data[item].value; break;
+			case 'energy_returned_tariff1':  currentReading.values[2] = data[item].value; break;
+			case 'energy_returned_tariff2':  currentReading.values[3] = data[item].value; break;
+			
+			case 'gas_delivered': currentReading.values[4] = data[item].value; break;
+		} //endswitch
+	}
 }
 
 function onButtonAnalysePlot(event)
@@ -306,8 +374,8 @@ function onButtonAnalysePlot(event)
 	//console.log(data);
 
 	//get current readings
-	var currentReading = getCurrentReading();
-	data.push(currentReading);
+	//var currentReading = getCurrentReading();
+	//data.push(currentReading);
 
 	//sort ASC
 	data.sort((a,b) => {return a.date.localeCompare(b.date);});
@@ -328,9 +396,9 @@ function onButtonAnalysePlot(event)
 	if( !dcWX.valid ) document.getElementById('chartW').style.display = "none";
 
 	//update charts
-	objChart1.update();
-	objChart2.update();
-	objChart3.update();
+	objChart1.update(0);
+	objChart2.update(0);
+	objChart3.update(0);
 
 	Spinner(false);
 }
@@ -346,8 +414,11 @@ function onButtonAnalyseLinear(event)
 	//console.log(data);
 
 	//get current readings
-	var currentReading = getCurrentReading();
-	data.push(currentReading);
+	//var currentReading = getCurrentReading();
+	//data.push(currentReading);
+
+	//sort ASC
+	data.sort((a,b) => {return a.date.localeCompare(b.date);});
 
 	//generate chartdata
 	//Calc intermediate, we want monthdata to export
@@ -365,9 +436,9 @@ function onButtonAnalyseLinear(event)
 	if( !dcWX.valid ) document.getElementById('chartW').style.display = "none";
 
 	//update charts
-	objChart1.update();
-	objChart2.update();
-	objChart3.update();
+	objChart1.update(0);
+	objChart2.update(0);
+	objChart3.update(0);
 
 	//Spinner(false);
 }
@@ -380,7 +451,7 @@ function createChartData(data, fCalculateIntermediate)
 	
 	var dsER1 = createDatasetLINE(false, "rgba(138,30,0,.4)", "Teruglevering I");
 	var dsER2 = createDatasetLINE(false, "rgba(108,60,0,.4)", "Teruglevering II");
-	var dsERX = createDatasetLINE(false, "rgba(168,0,0, 1)", "Teruglevering (I+II)");
+	var dsERX = createDatasetLINE(false, "rgba(168,0, 0, 1)", "Teruglevering (I+II)");
 
 	var dsGD  = createDatasetLINE(false, "rgba(0,138,0, 1)", "Gas");
 	var dsWD  = createDatasetLINE(false, "rgba(138,0,0, 1)", "Water");
@@ -481,8 +552,11 @@ function onButtonAnalyseCurved(event)
 	//console.log(data);
 
 	//get current readings
-	var currentReading = getCurrentReading();
-	data.push(currentReading);
+	//var currentReading = getCurrentReading();
+	//data.push(currentReading);
+	
+	//sort ASC
+	data.sort((a,b) => {return a.date.localeCompare(b.date);});
 
 	//generate chartdata
 	//Calc intermediate, we want monthdata to export
@@ -500,9 +574,9 @@ function onButtonAnalyseCurved(event)
 	if( !dcWX.valid ) document.getElementById('chartW').style.display = "none";
 
 	//update charts
-	objChart1.update();
-	objChart2.update();
-	objChart3.update();
+	objChart1.update(0);
+	objChart2.update(0);
+	objChart3.update(0);
 
 	Spinner(false);
 }
@@ -923,7 +997,7 @@ function calculateMonthSteps(listP, dateS, dateE, nTotal)
 	fillArray(listM,0);	
 	var nTime = dateS.getTime();
 	var nDays = Math.floor((dateE - dateS) / (1000*60*60*24));
-	var listV = new Array(nDays);
+	var listV = new Array( Math.abs(nDays) );
 	fillArray(listV,0);
 	
 	//calculate the days each month for this timespan
